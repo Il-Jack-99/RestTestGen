@@ -36,7 +36,7 @@ public class App {
         checkHelpArgument(args);
 
         // Set logger verbosity to INFO and welcome user
-        Configurator.setRootLevel(Level.INFO);
+        //Configurator.setRootLevel(Level.INFO);
         logger.info(messageHeader + " started.");
 
         // Configuration: the constructor loads the configuration from file, if available, or uses default

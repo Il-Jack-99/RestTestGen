@@ -8,6 +8,8 @@ import io.resttestgen.core.openapi.Operation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 import java.sql.Timestamp;
 
 /**
@@ -36,6 +38,8 @@ public class TestInteraction extends Taggable {
     // Other fields
     private Timestamp executionTime;
     private transient TestStatus testStatus = TestStatus.CREATED;
+
+
 
 
     public TestInteraction(Operation referenceOperation, Operation fuzzedOperation) {

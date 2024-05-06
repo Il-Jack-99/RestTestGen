@@ -48,8 +48,10 @@ public class NominalAndErrorStrategy extends Strategy {
                 try {
                     ReportWriter reportWriter = new ReportWriter(testSequence);
                     reportWriter.write();
+                    //todo
                     RestAssuredWriter restAssuredWriter = new RestAssuredWriter(testSequence);
                     restAssuredWriter.write();
+                    //todo
                 } catch (IOException e) {
                     logger.warn("Could not write report to file.");
                     e.printStackTrace();
@@ -73,6 +75,7 @@ public class NominalAndErrorStrategy extends Strategy {
         try {
             CoverageReportWriter coverageReportWriter = new CoverageReportWriter(TestRunner.getInstance().getCoverage());
             coverageReportWriter.write();
+            //todo
         } catch (IOException e) {
             logger.warn("Could not write Coverage report to file.");
             e.printStackTrace();

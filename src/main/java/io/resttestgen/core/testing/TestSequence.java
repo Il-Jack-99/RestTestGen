@@ -7,6 +7,7 @@ import io.resttestgen.core.helper.ExtendedRandom;
 import io.resttestgen.core.helper.Taggable;
 import org.jetbrains.annotations.NotNull;
 
+import javax.persistence.*;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -18,12 +19,16 @@ import static io.resttestgen.core.datatype.parameter.ParameterUtils.getLeaves;
  * Represents an ordered sequence of test interactions. Although the current implementations of fuzzers do not require
  * ordered sequences, the order is anyway managed by this class in order to support further extensions.
  */
+
 public class TestSequence extends Taggable implements List<TestInteraction> {
+
 
     public String readOnlyParameter = "";
 
     private String generator = "UserInstantiated";
     private String name = generateRandomTestSequenceName();
+
+
     private List<TestInteraction> testInteractions = new LinkedList<>();
 
     // Time information
