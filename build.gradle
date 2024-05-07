@@ -8,8 +8,8 @@ group 'io.resttestgen'
 version '24.03'
 
 application {
-    mainClass.set('io.resttestgen.boot.cli.App')
-    //mainClass.set('io.resttestgen.boot.cli.ApplicationStarter')
+    //mainClass.set('io.resttestgen.boot.cli.App')
+    mainClass.set('io.resttestgen.boot.cli.ApplicationStarter')
 }
 
 repositories {
