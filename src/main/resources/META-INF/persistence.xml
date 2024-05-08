@@ -1,0 +1,33 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="2.0">
+    <persistence-unit name="rtg_pu" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <!-- Definizione delle classi di entità -->
+        <class>io.resttestgen.database.Model.Job</class>
+        <class>io.resttestgen.database.Model.TestInteraction</class>
+        <class>io.resttestgen.database.Model.TestResult</class>
+        <class>io.resttestgen.database.Model.TestSequence</class>
+
+        <!-- Proprietà di configurazione della connessione al database -->
+        <properties>
+            <!-- URL del database -->
+
+            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://${DOCKER_IP_HOST:localhost}:5432/RTG_Demo"/>
+            <!-- Driver JDBC -->
+            <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+            <!-- Utente del database -->
+            <property name="javax.persistence.jdbc.user" value="postgres"/>
+            <!-- Password dell'utente -->
+            <property name="javax.persistence.jdbc.password" value="Passw0rd"/>
+
+            <!-- Dialetto del database per Hibernate -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgresPlusDialect"/>
+            <!-- Visualizza le query SQL generate da Hibernate nella console -->
+            <property name="hibernate.show_sql" value="true"/>
+            <!-- Formatta le query SQL generate da Hibernate -->
+            <property name="hibernate.format_sql" value="true"/>
+            <!-- Crea lo schema del database all'avvio e lo elimina alla chiusura dell'applicazione -->
+            <!-- <property name="hibernate.hbm2ddl.auto" value="create"/> -->
+        </properties>
+    </persistence-unit>
+</persistence>
