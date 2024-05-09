@@ -21,11 +21,11 @@ public class TestInteraction {
         this.id = id;
     }
 
-    public String getExecutionTime() {
+    public Timestamp getExecutionTime() {
         return executionTime;
     }
 
-    public void setExecutionTime(String executionTime) {
+    public void setExecutionTime(Timestamp executionTime) {
         this.executionTime = executionTime;
     }
 
@@ -155,7 +155,7 @@ public class TestInteraction {
     private Long id;
 
     @Column(name = "execution_time")
-    private String executionTime;
+    private Timestamp executionTime;
 
     @Column(name = "request_body", columnDefinition = "TEXT")
     private String requestBody;

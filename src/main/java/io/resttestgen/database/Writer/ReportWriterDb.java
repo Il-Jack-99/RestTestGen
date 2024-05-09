@@ -64,7 +64,7 @@ public class ReportWriterDb {
             testInteraction.setResponseHeaders(ti.getResponseHeaders());
             testInteraction.setResponseBody(ti.getResponseBody());
             testInteraction.setResponseReceivedAt(ti.getResponseReceivedAt());
-            //testInteraction.setExecutionTime(ti.getExecutionTime().toString());
+            testInteraction.setExecutionTime(ti.getExecutionTime());
             testInteraction.setTestStatus(ti.getTestStatus().toString());
             testInteraction.setSequence(createdTestSequence);
 
