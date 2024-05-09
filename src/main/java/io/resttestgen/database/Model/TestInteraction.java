@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.time.Instant;
 
 @Entity
@@ -52,11 +53,11 @@ public class TestInteraction {
         this.requestMethod = requestMethod;
     }
 
-    public Instant getRequestSentAt() {
+    public Timestamp getRequestSentAt() {
         return requestSentAt;
     }
 
-    public void setRequestSentAt(Instant requestSentAt) {
+    public void setRequestSentAt(Timestamp requestSentAt) {
         this.requestSentAt = requestSentAt;
     }
 
@@ -92,11 +93,11 @@ public class TestInteraction {
         this.responseProtocol = responseProtocol;
     }
 
-    public Instant getResponseReceivedAt() {
+    public Timestamp getResponseReceivedAt() {
         return responseReceivedAt;
     }
 
-    public void setResponseReceivedAt(Instant responseReceivedAt) {
+    public void setResponseReceivedAt(Timestamp responseReceivedAt) {
         this.responseReceivedAt = responseReceivedAt;
     }
 
@@ -167,7 +168,7 @@ public class TestInteraction {
     private String requestMethod;
 
     @Column(name = "request_sent_at")
-    private Instant requestSentAt;
+    private Timestamp requestSentAt;
 
 
     @Column(name = "request_url")
@@ -185,7 +186,7 @@ public class TestInteraction {
     private String responseProtocol;
 
     @Column(name = "response_received_at")
-    private Instant responseReceivedAt;
+    private Timestamp responseReceivedAt;
 
 
     @Column(name = "response_status_code")
