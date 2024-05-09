@@ -7,7 +7,16 @@ public class TestResult {
     private transient final String defaultMessage = "No further information available.";
 
     private TestResultEnum result = TestResultEnum.PENDING;
+
     private String message = "Pending evaluation.";
+
+    public String getResult() {
+        return result.toString();
+    }
+
+    public String getMessage() {
+        return message;
+    }
 
 
     public TestResult setPass() {

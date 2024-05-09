@@ -1,16 +1,20 @@
 package io.resttestgen.database.Writer;
 
+import io.resttestgen.core.testing.Oracle;
+import io.resttestgen.core.testing.TestResult;
 import io.resttestgen.database.Model.Job;
 import io.resttestgen.database.Model.TestInteraction;
 import io.resttestgen.database.Model.TestSequence;
 import io.resttestgen.database.Repository.JobRepository;
 import io.resttestgen.database.Repository.TestInteractionRepository;
+import io.resttestgen.database.Repository.TestResultRepository;
 import io.resttestgen.database.Repository.TestSequenceRepository;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ReportWriterDb {
@@ -20,6 +24,8 @@ public class ReportWriterDb {
     private TestSequenceRepository testSequenceRepository;
     private TestInteractionRepository testInteractionRepository;
 
+    private TestResultRepository testResultRepository;
+
     public ReportWriterDb(){
         JobRepository jobRepository = new JobRepository();
         this.job = jobRepository.findFromFileById();
@@ -27,6 +33,7 @@ public class ReportWriterDb {
 
         this.testSequenceRepository = new TestSequenceRepository();
         this.testInteractionRepository = new TestInteractionRepository();
+        this.testResultRepository = new TestResultRepository();
     }
 
     public void write(io.resttestgen.core.testing.TestSequence testSequence){
@@ -72,6 +79,23 @@ public class ReportWriterDb {
 
             testInteractions.add(testInteraction);
         }
+
+
+        Map<Oracle, io.resttestgen.core.testing.TestResult> resultsMap = testSequence.getTestResults();
+
+        for (Map.Entry<Oracle, io.resttestgen.core.testing.TestResult> entry : resultsMap.entrySet()) {
+            Oracle oracle = entry.getKey();
+            io.resttestgen.core.testing.TestResult testResult = entry.getValue();
+
+            io.resttestgen.database.Model.TestResult tr = new io.resttestgen.database.Model.TestResult();
+            tr.setOracle(oracle.toString());
+            tr.setResult(testResult.getResult());
+            tr.setMessage(testResult.getMessage());
+
+            tr.setSequence(ts);
+            testResultRepository.add(tr);
+        }
+
 
 
 
