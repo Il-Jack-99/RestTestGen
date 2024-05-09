@@ -24,6 +24,8 @@ public class TestSequence extends Taggable implements List<TestInteraction> {
 
     private String generator = "UserInstantiated";
     private String name = generateRandomTestSequenceName();
+
+
     private List<TestInteraction> testInteractions = new LinkedList<>();
 
     // Time information
@@ -48,6 +50,11 @@ public class TestSequence extends Taggable implements List<TestInteraction> {
         setGenerator(generator);
         this.testInteractions = testInteractions;
     }
+
+    public List<TestInteraction> getTestInteractions() {
+        return testInteractions;
+    }
+
 
     protected void setTestInteractions(List<TestInteraction> testInteractions) {
         this.testInteractions = testInteractions;

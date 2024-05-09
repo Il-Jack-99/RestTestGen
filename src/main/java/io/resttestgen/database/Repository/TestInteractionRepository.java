@@ -1,37 +1,29 @@
 package io.resttestgen.database.Repository;
 
-
+import io.resttestgen.database.Model.TestInteraction;
 import io.resttestgen.database.Model.TestSequence;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-
-public class TestSequenceRepository {
-
+public class TestInteractionRepository {
     private EntityManager entityManager;
     private EntityManagerFactory emf;
 
-    public TestSequenceRepository() {
+    public TestInteractionRepository() {
         this.emf = Persistence.createEntityManagerFactory("rtg_pu");
         this.entityManager = this.emf.createEntityManager();
     }
 
-    public TestSequence add(TestSequence testSequence) {
+    public TestInteraction add(TestInteraction testInteraction) {
         entityManager.getTransaction().begin();
-        entityManager.persist(testSequence);
+        entityManager.persist(testInteraction);
         entityManager.getTransaction().commit();
-        return testSequence;
+        return testInteraction;
     }
 
-    public TestSequence findById(Long id){
-        return entityManager.find(TestSequence.class, id);
-    }
-
-
-
-    public void close() {
-        emf.close();
+    public TestInteraction findById(Long id){
+        return entityManager.find(TestInteraction.class, id);
     }
 }

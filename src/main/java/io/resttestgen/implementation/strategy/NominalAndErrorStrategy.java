@@ -5,6 +5,8 @@ import io.resttestgen.core.testing.Strategy;
 import io.resttestgen.core.testing.TestRunner;
 import io.resttestgen.core.testing.TestSequence;
 import io.resttestgen.core.testing.operationsorter.OperationsSorter;
+import io.resttestgen.database.Repository.TestSequenceRepository;
+import io.resttestgen.database.Writer.ReportWriterDb;
 import io.resttestgen.implementation.fuzzer.ErrorFuzzer;
 import io.resttestgen.implementation.fuzzer.NominalFuzzer;
 import io.resttestgen.implementation.operationssorter.GraphBasedOperationsSorter;
@@ -21,9 +23,13 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class NominalAndErrorStrategy extends Strategy {
 
+    ReportWriterDb reportWriterDb = new ReportWriterDb();
+
     private static final Logger logger = LogManager.getLogger(NominalAndErrorStrategy.class);
 
     private final TestSequence globalNominalTestSequence = new TestSequence();
+
+
 
     public void start() {
 
@@ -48,6 +54,10 @@ public class NominalAndErrorStrategy extends Strategy {
                 try {
                     ReportWriter reportWriter = new ReportWriter(testSequence);
                     reportWriter.write();
+
+                    reportWriterDb.write(testSequence);
+
+
                     RestAssuredWriter restAssuredWriter = new RestAssuredWriter(testSequence);
                     restAssuredWriter.write();
                 } catch (IOException e) {

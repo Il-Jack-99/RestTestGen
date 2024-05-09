@@ -1,2 +1,3 @@
 apiUnderTest: bookstore
 strategyClassName: NominalAndErrorStrategy
+jobId: 1

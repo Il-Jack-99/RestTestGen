@@ -115,8 +115,6 @@ public class TestSequence {
                 ", name='" + name + '\'' +
                 ", readOnlyParameter='" + readOnlyParameter + '\'' +
                 ", generator='" + generator + '\'' +
-                ", testInteractions=" + testInteractions +
-                ", testResults=" + testResults +
                 '}';
     }
 }
