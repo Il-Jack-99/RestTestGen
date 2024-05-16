@@ -7,6 +7,7 @@ import io.resttestgen.core.testing.TestInteraction;
 import io.resttestgen.core.testing.TestRunner;
 import io.resttestgen.core.testing.TestSequence;
 import io.resttestgen.core.testing.mutator.OperationMutator;
+import io.resttestgen.database.Writer.ReportWriterDb;
 import io.resttestgen.database.Writer.RestAssuredWriterDb;
 import io.resttestgen.implementation.mutator.operation.MutateRandomParameterWithParameterMutatorOperationMutator;
 import io.resttestgen.implementation.mutator.parameter.ConstraintViolationParameterMutator;
@@ -26,6 +27,7 @@ public class ErrorFuzzer extends Fuzzer {
 
 
     private Map<String, String> errorMap;
+    private ReportWriterDb reportWriterDb;
     private static final Logger logger = LogManager.getLogger(ErrorFuzzer.class);
 
     private final TestSequence testSequenceToMutate;
@@ -38,6 +40,7 @@ public class ErrorFuzzer extends Fuzzer {
         mutators.add(new MutateRandomParameterWithParameterMutatorOperationMutator(new WrongTypeParameterMutator()));
         mutators.add(new MutateRandomParameterWithParameterMutatorOperationMutator(new ConstraintViolationParameterMutator()));
         errorMap = new HashMap<>();
+        reportWriterDb = new ReportWriterDb();
     }
 
     public Map<String, String> getErrorMap(){
@@ -99,6 +102,7 @@ public class ErrorFuzzer extends Fuzzer {
                 try {
                     ReportWriter reportWriter = new ReportWriter(currentTestSequence);
                     reportWriter.write();
+                    reportWriterDb.write(currentTestSequence);
                     RestAssuredWriter restAssuredWriter = new RestAssuredWriter(currentTestSequence);
                     //restAssuredWriter.write();
                     //restAssuredWriterDb.addToErrorMap(restAssuredWriter.testAssuredFileName(), restAssuredWriter.testAssuredContent());
