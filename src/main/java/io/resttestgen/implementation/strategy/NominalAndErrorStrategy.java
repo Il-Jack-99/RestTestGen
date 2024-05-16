@@ -19,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 @SuppressWarnings("unused")
 public class NominalAndErrorStrategy extends Strategy {
@@ -62,7 +63,12 @@ public class NominalAndErrorStrategy extends Strategy {
 
                     RestAssuredWriter restAssuredWriter = new RestAssuredWriter(testSequence);
                     //restAssuredWriter.write();
-                    restAssuredWriterDb.addToNominalMap(restAssuredWriter.testAssuredFileName(), restAssuredWriter.testAssuredContent());
+
+
+                    restAssuredWriterDb.addToNominalMap(restAssuredWriter.testAssuredFileName(), restAssuredWriter.testAssuredContent() );
+
+
+
                 } catch (IOException e) {
                     logger.warn("Could not write report to file.");
                     e.printStackTrace();
@@ -72,7 +78,7 @@ public class NominalAndErrorStrategy extends Strategy {
             sorter.removeFirst();
         }
 
-        restAssuredWriterDb.write();
+        restAssuredWriterDb.writeNominal();
 
 
 
@@ -84,6 +90,13 @@ public class NominalAndErrorStrategy extends Strategy {
 
         ErrorFuzzer errorFuzzer = new ErrorFuzzer(globalNominalTestSequence);
         errorFuzzer.generateTestSequences(10);
+
+        restAssuredWriterDb.addErrorMap(errorFuzzer.getErrorMap());
+
+        restAssuredWriterDb.writeError();
+
+        restAssuredWriterDb.getErrorMap();
+        restAssuredWriterDb.write();
 
         try {
             CoverageReportWriter coverageReportWriter = new CoverageReportWriter(TestRunner.getInstance().getCoverage());

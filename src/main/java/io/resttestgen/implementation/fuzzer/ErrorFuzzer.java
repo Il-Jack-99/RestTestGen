@@ -7,6 +7,7 @@ import io.resttestgen.core.testing.TestInteraction;
 import io.resttestgen.core.testing.TestRunner;
 import io.resttestgen.core.testing.TestSequence;
 import io.resttestgen.core.testing.mutator.OperationMutator;
+import io.resttestgen.database.Writer.RestAssuredWriterDb;
 import io.resttestgen.implementation.mutator.operation.MutateRandomParameterWithParameterMutatorOperationMutator;
 import io.resttestgen.implementation.mutator.parameter.ConstraintViolationParameterMutator;
 import io.resttestgen.implementation.mutator.parameter.MissingRequiredParameterMutator;
@@ -18,14 +19,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ErrorFuzzer extends Fuzzer {
 
+
+    private Map<String, String> errorMap;
     private static final Logger logger = LogManager.getLogger(ErrorFuzzer.class);
 
     private final TestSequence testSequenceToMutate;
@@ -37,6 +37,11 @@ public class ErrorFuzzer extends Fuzzer {
         mutators.add(new MutateRandomParameterWithParameterMutatorOperationMutator(new MissingRequiredParameterMutator()));
         mutators.add(new MutateRandomParameterWithParameterMutatorOperationMutator(new WrongTypeParameterMutator()));
         mutators.add(new MutateRandomParameterWithParameterMutatorOperationMutator(new ConstraintViolationParameterMutator()));
+        errorMap = new HashMap<>();
+    }
+
+    public Map<String, String> getErrorMap(){
+        return errorMap;
     }
 
     public List<TestSequence> generateTestSequences(int numberOfSequences) {
@@ -95,7 +100,9 @@ public class ErrorFuzzer extends Fuzzer {
                     ReportWriter reportWriter = new ReportWriter(currentTestSequence);
                     reportWriter.write();
                     RestAssuredWriter restAssuredWriter = new RestAssuredWriter(currentTestSequence);
-                    restAssuredWriter.write();
+                    //restAssuredWriter.write();
+                    //restAssuredWriterDb.addToErrorMap(restAssuredWriter.testAssuredFileName(), restAssuredWriter.testAssuredContent());
+                    errorMap.put(restAssuredWriter.testAssuredFileName(), restAssuredWriter.testAssuredContent());
                 } catch (IOException e) {
                     logger.warn("Could not write report to file.");
                 }

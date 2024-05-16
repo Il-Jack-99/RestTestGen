@@ -17,10 +17,18 @@ import java.util.zip.ZipOutputStream;
 public class RestAssuredWriterDb {
 
     private Job job;
+    RestAssured restAssured = new RestAssured();
 
     private Map<String, String> nominalMap;
     private Map<String, String> errorMap;
     private RestAssuredRepository restAssuredRepository;
+
+    public void getErrorMap() {
+
+        errorMap.forEach((key, value) -> {
+            System.out.println("Key: " + key + ", Value: " + value);
+        });
+    }
 
     public RestAssuredWriterDb(){
         JobRepository jobRepository = new JobRepository();
@@ -31,6 +39,7 @@ public class RestAssuredWriterDb {
         this.errorMap = new HashMap<>();
 
         this.restAssuredRepository = new RestAssuredRepository();
+        restAssured.setJob(job);
 
     }
 
@@ -38,23 +47,32 @@ public class RestAssuredWriterDb {
         nominalMap.put(fileName, testAssured);
     }
 
+    public void addErrorMap(Map<String, String> errorMap){
+        this.errorMap = errorMap;
+    }
+
     public void addToErrorMap(String fileName, String testAssured){
         errorMap.put(fileName, testAssured);
     }
 
     public void write(){
-        byte[] nominalZipBytes = writeZipToBytes(nominalMap);
-        byte[] errorZipBytes = writeZipToBytes(errorMap);
-
-        RestAssured restAssured = new RestAssured();
-        restAssured.setNominalFileName("NominalFiles.zip");
-        restAssured.setNominalFile(nominalZipBytes);
-        restAssured.setErrorFileName("ErrorFiles.zip");
-        restAssured.setErrorFile(errorZipBytes);
-        restAssured.setJob(job);
-
         restAssuredRepository.add(restAssured);
     }
+
+    public void writeNominal(){
+        byte[] nominalZipBytes = writeZipToBytes(nominalMap);
+
+        restAssured.setNominalFileName("NominalFiles.zip");
+        restAssured.setNominalFile(nominalZipBytes);
+
+    }
+
+    public void writeError() {
+        byte[] errorZipBytes = writeZipToBytes(errorMap);
+        restAssured.setErrorFileName("ErrorFiles.zip");
+        restAssured.setErrorFile(errorZipBytes);
+    }
+
 
     private byte[] writeZipToBytes(Map<String,String> contentMap){
         try(ByteArrayOutputStream baos = new ByteArrayOutputStream();
