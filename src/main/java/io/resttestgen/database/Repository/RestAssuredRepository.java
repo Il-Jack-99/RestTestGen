@@ -1,40 +1,30 @@
 package io.resttestgen.database.Repository;
 
-
-import io.resttestgen.database.Model.TestSequence;
+import io.resttestgen.database.Model.RestAssured;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 
-public class TestSequenceRepository {
+public class RestAssuredRepository {
+
 
     private EntityManager entityManager;
     private EntityManagerFactory emf;
 
-    public TestSequenceRepository() {
+    public RestAssuredRepository() {
         this.emf = Persistence.createEntityManagerFactory("rtg_pu");
         this.entityManager = this.emf.createEntityManager();
+
     }
 
-    public TestSequence add(TestSequence testSequence) {
+    public RestAssured add(RestAssured restAssured){
         entityManager.getTransaction().begin();
-        entityManager.persist(testSequence);
+        entityManager.persist(restAssured);
         entityManager.getTransaction().commit();
-        return testSequence;
+        return restAssured;
     }
 
 
-
-
-    public TestSequence findById(Long id){
-        return entityManager.find(TestSequence.class, id);
-    }
-
-
-
-    public void close() {
-        emf.close();
-    }
 }

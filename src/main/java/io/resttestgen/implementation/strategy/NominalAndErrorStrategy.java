@@ -5,8 +5,8 @@ import io.resttestgen.core.testing.Strategy;
 import io.resttestgen.core.testing.TestRunner;
 import io.resttestgen.core.testing.TestSequence;
 import io.resttestgen.core.testing.operationsorter.OperationsSorter;
-import io.resttestgen.database.Repository.TestSequenceRepository;
 import io.resttestgen.database.Writer.ReportWriterDb;
+import io.resttestgen.database.Writer.RestAssuredWriterDb;
 import io.resttestgen.implementation.fuzzer.ErrorFuzzer;
 import io.resttestgen.implementation.fuzzer.NominalFuzzer;
 import io.resttestgen.implementation.operationssorter.GraphBasedOperationsSorter;
@@ -24,6 +24,8 @@ import java.util.List;
 public class NominalAndErrorStrategy extends Strategy {
 
     ReportWriterDb reportWriterDb = new ReportWriterDb();
+    RestAssuredWriterDb restAssuredWriterDb = new RestAssuredWriterDb();
+
 
     private static final Logger logger = LogManager.getLogger(NominalAndErrorStrategy.class);
 
@@ -55,11 +57,12 @@ public class NominalAndErrorStrategy extends Strategy {
                     ReportWriter reportWriter = new ReportWriter(testSequence);
                     reportWriter.write();
 
-                    reportWriterDb.write(testSequence);
+                    //reportWriterDb.write(testSequence);
 
 
                     RestAssuredWriter restAssuredWriter = new RestAssuredWriter(testSequence);
-                    restAssuredWriter.write();
+                    //restAssuredWriter.write();
+                    restAssuredWriterDb.addToNominalMap(restAssuredWriter.testAssuredFileName(), restAssuredWriter.testAssuredContent());
                 } catch (IOException e) {
                     logger.warn("Could not write report to file.");
                     e.printStackTrace();
@@ -68,6 +71,8 @@ public class NominalAndErrorStrategy extends Strategy {
             globalNominalTestSequence.append(nominalSequences);
             sorter.removeFirst();
         }
+
+        restAssuredWriterDb.write();
 
 
 

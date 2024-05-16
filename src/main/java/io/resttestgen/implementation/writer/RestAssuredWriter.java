@@ -41,6 +41,25 @@ public class RestAssuredWriter extends Writer {
         return "REST-assured";
     }
 
+    public String testAssuredFileName(){
+        return getSuggestedFileName("java").replaceAll("-","_");
+    }
+
+    public String testAssuredContent(){
+        StringBuilder path = new StringBuilder();
+
+        //write imports
+        String content = generateImport() +
+                //write tests classes
+                generateClass() +
+                //write mainClass
+                generateMainTestMethod() +
+                "}\n";
+
+
+        return content;
+    }
+
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public void write() throws IOException {
 
