@@ -57,7 +57,7 @@ public class NominalAndErrorStrategy extends Strategy {
                 try {
                     ReportWriter reportWriter = new ReportWriter(testSequence);
                     reportWriter.write();
-
+                    //todo
                     //reportWriterDb.write(testSequence);
 
 
@@ -96,7 +96,8 @@ public class NominalAndErrorStrategy extends Strategy {
         restAssuredWriterDb.writeError();
 
         restAssuredWriterDb.getErrorMap();
-        restAssuredWriterDb.write();
+        //todo
+        //restAssuredWriterDb.write();
 
         try {
             CoverageReportWriter coverageReportWriter = new CoverageReportWriter(TestRunner.getInstance().getCoverage());

@@ -6,6 +6,10 @@ import io.resttestgen.core.datatype.NormalizedParameterName;
 import io.resttestgen.core.datatype.parameter.Parameter;
 import io.resttestgen.core.openapi.OpenApi;
 import io.resttestgen.core.openapi.Operation;
+import io.resttestgen.database.Model.Job;
+import io.resttestgen.database.Model.Odg;
+import io.resttestgen.database.Repository.JobRepository;
+import io.resttestgen.database.Repository.OdgRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jgrapht.Graph;
@@ -15,10 +19,7 @@ import org.jgrapht.nio.Attribute;
 import org.jgrapht.nio.DefaultAttribute;
 import org.jgrapht.nio.dot.DOTExporter;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -30,6 +31,9 @@ import java.util.stream.Collectors;
  * of dependency among these operations. E.g. input/output data dependencies, CRUD dependencies, etc.
  */
 public class OperationDependencyGraph {
+    
+    private OdgRepository odgRepository;
+    private JobRepository jobRepository;
 
     private static final Logger logger = LogManager.getLogger(OperationDependencyGraph.class);
     private final Configuration configuration = Environment.getInstance().getConfiguration();
@@ -41,6 +45,9 @@ public class OperationDependencyGraph {
      * @param openAPI the parsed, valid OpenAPI specification
      */
     public OperationDependencyGraph(OpenApi openAPI) {
+        
+        odgRepository = new OdgRepository();
+        jobRepository = new JobRepository();
 
         // Get operations from specification and add them to the graph as vertices
         logger.debug("Collecting operations from OpenAPI specification.");
@@ -54,10 +61,45 @@ public class OperationDependencyGraph {
 
         // Save graph to file
         try {
+            saveToDb();
             saveToFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void saveToDb() throws IOException {
+        DOTExporter<OperationNode, DependencyEdge> exporter = new DOTExporter<>();
+        exporter.setVertexAttributeProvider((v) -> {
+            Map<String, Attribute> map = new LinkedHashMap<>();
+            map.put("label", DefaultAttribute.createAttribute(v.toString()));
+            return map;
+        });
+        exporter.setEdgeAttributeProvider((e) -> {
+            Map<String, Attribute> map = new LinkedHashMap<>();
+            map.put("label", DefaultAttribute.createAttribute(e.toString()));
+            return map;
+        });
+
+        // Utilizza StringWriter anziché FileWriter per stampare l'ODG
+        StringWriter writer = new StringWriter();
+        exporter.exportGraph(this.graph, writer);
+
+        // Stampa l'ODG
+        String odg_to_save = writer.toString();
+
+        Job job = new Job();
+        job = jobRepository.findFromFileById();
+
+        Odg dbOdg = new Odg();
+        dbOdg.setOdg(odg_to_save);
+        dbOdg.setJob(job);
+
+        odgRepository.add(dbOdg);
+        jobRepository.close();
+
+        writer.flush();
+        writer.close();
     }
 
     public Graph<OperationNode, DependencyEdge> getGraph() {
@@ -157,6 +199,9 @@ public class OperationDependencyGraph {
         Writer writer = new FileWriter(configuration.getOutputPath() + configuration.getTestingSessionName() + "/" +
                 configuration.getOdgFileName());
         exporter.exportGraph(this.graph, writer);
+
+        //Save odg to Db here
+
         writer.flush();
         writer.close();
     }

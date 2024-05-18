@@ -8,6 +8,8 @@
         <class>io.resttestgen.database.Model.TestResult</class>
         <class>io.resttestgen.database.Model.TestSequence</class>
         <class>io.resttestgen.database.Model.RestAssured</class>
+        <class>io.resttestgen.database.Model.Odg</class>
+
 
         <!-- Proprietà di configurazione della connessione al database -->
         <properties>
