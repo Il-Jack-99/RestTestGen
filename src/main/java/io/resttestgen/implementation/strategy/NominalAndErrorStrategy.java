@@ -106,7 +106,8 @@ public class NominalAndErrorStrategy extends Strategy {
             coverageReportWriter.write();
 
             coverageReportWriterDb = new CoverageReportWriterDb(TestRunner.getInstance().getCoverage());
-            coverageReportWriterDb.writeStats();
+            coverageReportWriterDb.writeSingleCoverage();
+            //coverageReportWriterDb.writeStats();
 
         } catch (IOException e) {
             logger.warn("Could not write Coverage report to file.");
