@@ -21,6 +21,8 @@ public class CoverageReportWriterDb {
 
     private CoverageStatRepository coverageStatRepository;
 
+    private OperationCoverageRepository operationCoverageRepository;
+
     private final CoverageManager coverageManager;
     private final Configuration configuration = Environment.getInstance().getConfiguration();
 
@@ -32,6 +34,7 @@ public class CoverageReportWriterDb {
 
         this.coverageStatRepository = new CoverageStatRepository();
         this.coverageManager = coverageManager;
+        this.operationCoverageRepository = new OperationCoverageRepository();
     }
 
     public void writeSingleCoverage(){
@@ -49,17 +52,17 @@ public class CoverageReportWriterDb {
     }
 
     private void writeSingleOperationCoverage(JsonObject reportAsJsonObject) {
-        System.out.println("Sono in writeSingleOperationCoverage");
         JsonArray documented = reportAsJsonObject.getAsJsonArray("documented");
-        saveCoverageData(documented, "documented");
+        saveCoverageData(documented, "documented", "OperationCoverage");
         JsonArray documentedTested = reportAsJsonObject.getAsJsonArray("documentedTested");
+        saveCoverageData(documentedTested, "documentedTested", "OperationCoverage");
         JsonArray notDocumentedTested = reportAsJsonObject.getAsJsonArray("notDocumentedTested");
+        saveCoverageData(notDocumentedTested, "notDocumentedTested", "OperationCoverage");
         JsonArray notTested = reportAsJsonObject.getAsJsonArray("notTested");
-
-
+        saveCoverageData(notTested, "notTested", "OperationCoverage");
     }
 
-    private void saveCoverageData(JsonArray data, String category) {
+    private void saveCoverageData(JsonArray data, String category, String covType) {
         if (data != null) {
             for (JsonElement element : data) {
                 String endpoint = element.getAsString();
@@ -76,18 +79,16 @@ public class CoverageReportWriterDb {
                         path = "/" + pathParts[pathParts.length - 1];
                     }
 
-                    // Salva i dati nella tabella Operation_coverage
-                    OperationCoverage operationCoverage = new OperationCoverage();
-                    operationCoverage.setCategory(category);
-                    operationCoverage.setMethod(method);
-                    operationCoverage.setEndpoint(path);
+                    if(covType == "OperationCoverage") {
+                        OperationCoverage operationCoverage = new OperationCoverage();
+                        operationCoverage.setCategory(category);
+                        operationCoverage.setMethod(method);
+                        operationCoverage.setEndpoint(path);
+                        operationCoverage.setJob(job);
 
+                        operationCoverageRepository.add(operationCoverage);
+                    }
 
-                    System.out.println("\n");
-                    System.out.println("Category: "+category);
-                    System.out.println("Endpoint: "+path);
-                    System.out.println("Method: "+ method);
-                    System.out.println("\n");
                 }
             }
         }

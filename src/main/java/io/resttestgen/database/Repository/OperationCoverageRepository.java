@@ -1,6 +1,6 @@
 package io.resttestgen.database.Repository;
 
-import io.resttestgen.database.Model.Odg;
+
 import io.resttestgen.database.Model.OperationCoverage;
 
 import javax.persistence.EntityManager;
