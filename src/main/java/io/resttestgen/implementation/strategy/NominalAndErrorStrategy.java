@@ -5,6 +5,7 @@ import io.resttestgen.core.testing.Strategy;
 import io.resttestgen.core.testing.TestRunner;
 import io.resttestgen.core.testing.TestSequence;
 import io.resttestgen.core.testing.operationsorter.OperationsSorter;
+import io.resttestgen.database.Writer.CoverageReportWriterDb;
 import io.resttestgen.database.Writer.ReportWriterDb;
 import io.resttestgen.database.Writer.RestAssuredWriterDb;
 import io.resttestgen.implementation.fuzzer.ErrorFuzzer;
@@ -24,6 +25,7 @@ import java.util.Objects;
 @SuppressWarnings("unused")
 public class NominalAndErrorStrategy extends Strategy {
 
+    CoverageReportWriterDb coverageReportWriterDb;
     ReportWriterDb reportWriterDb = new ReportWriterDb();
     RestAssuredWriterDb restAssuredWriterDb = new RestAssuredWriterDb();
 
@@ -102,6 +104,10 @@ public class NominalAndErrorStrategy extends Strategy {
         try {
             CoverageReportWriter coverageReportWriter = new CoverageReportWriter(TestRunner.getInstance().getCoverage());
             coverageReportWriter.write();
+
+            coverageReportWriterDb = new CoverageReportWriterDb(TestRunner.getInstance().getCoverage());
+            coverageReportWriterDb.writeStats();
+
         } catch (IOException e) {
             logger.warn("Could not write Coverage report to file.");
             e.printStackTrace();
