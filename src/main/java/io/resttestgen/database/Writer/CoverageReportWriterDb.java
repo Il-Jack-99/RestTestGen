@@ -11,9 +11,14 @@ import io.resttestgen.core.testing.coverage.CoverageManager;
 import io.resttestgen.database.Model.CoverageStat;
 import io.resttestgen.database.Model.OperationCoverage;
 import io.resttestgen.database.Model.Job;
+import io.resttestgen.database.Model.PathCoverage;
 import io.resttestgen.database.Repository.CoverageStatRepository;
 import io.resttestgen.database.Repository.JobRepository;
 import io.resttestgen.database.Repository.OperationCoverageRepository;
+import io.resttestgen.database.Repository.PathCoverageRepository;
+
+import java.nio.file.Path;
+import java.util.Map;
 
 public class CoverageReportWriterDb {
 
@@ -22,6 +27,8 @@ public class CoverageReportWriterDb {
     private CoverageStatRepository coverageStatRepository;
 
     private OperationCoverageRepository operationCoverageRepository;
+
+    private PathCoverageRepository pathCoverageRepository;
 
     private final CoverageManager coverageManager;
     private final Configuration configuration = Environment.getInstance().getConfiguration();
@@ -35,20 +42,57 @@ public class CoverageReportWriterDb {
         this.coverageStatRepository = new CoverageStatRepository();
         this.coverageManager = coverageManager;
         this.operationCoverageRepository = new OperationCoverageRepository();
+        this.pathCoverageRepository = new PathCoverageRepository();
     }
 
-    public void writeSingleCoverage(){
-        for(Coverage coverage : coverageManager.getCoverages()){
-            //System.out.println("REPORT    COVERAGE    "+coverage.getClass().getSimpleName()+"/n");
-            //System.out.println(coverage.getReportAsJsonObject());
-            //System.out.println("/n");
+    public void writeSingleCoverage() {
+        for (Coverage coverage : coverageManager.getCoverages()) {
 
-            System.out.println("Sono in writeSingleCoverage");
-            switch(coverage.getClass().getSimpleName()){
-                case "OperationCoverage":
-                    writeSingleOperationCoverage(coverage.getReportAsJsonObject());
+
+            if(coverage.getClass().getSimpleName().equals("OperationCoverage")){
+                //writeSingleOperationCoverage(coverage.getReportAsJsonObject());
+            }
+            else if(coverage.getClass().getSimpleName().equals("PathCoverage")){
+                //writeSinglePathCoverage(coverage.getReportAsJsonObject());
+            }
+            else if(coverage.getClass().getSimpleName().equals("StatusCode")){
+
+            }
+
+
+        }
+    }
+
+    private void writeSinglePathCoverage(JsonObject reportAsJsonObject){
+
+
+        JsonArray documented = reportAsJsonObject.getAsJsonArray("documented");
+        savePathCoverageData(documented, "documented", "PathCoverage");
+        JsonArray documentedTested = reportAsJsonObject.getAsJsonArray("documentedTested");
+        savePathCoverageData(documentedTested, "documentedTested", "PathCoverage");
+        JsonArray notDocumentedTested = reportAsJsonObject.getAsJsonArray("notDocumentedTested");
+        savePathCoverageData(notDocumentedTested, "notDocumentedTested", "PathCoverage");
+        JsonArray notTested = reportAsJsonObject.getAsJsonArray("notTested");
+        savePathCoverageData(notTested, "notTested", "PathCoverage");
+    }
+
+    private void savePathCoverageData(JsonArray data, String category, String covType) {
+
+
+        if (data != null) {
+            for (JsonElement element : data) {
+                String endpoint = element.getAsString();
+
+                PathCoverage pathCoverage = new PathCoverage();
+                pathCoverage.setCategory(category);
+                pathCoverage.setPath(endpoint);
+                pathCoverage.setJob(job);
+
+                pathCoverageRepository.add(pathCoverage);
+
             }
         }
+
     }
 
     private void writeSingleOperationCoverage(JsonObject reportAsJsonObject) {

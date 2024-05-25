@@ -11,7 +11,7 @@
         <class>io.resttestgen.database.Model.Odg</class>
         <class>io.resttestgen.database.Model.CoverageStat</class>
         <class>io.resttestgen.database.Model.OperationCoverage</class>
-
+        <class>io.resttestgen.database.Model.PathCoverage</class>
 
         <!-- Proprietà di configurazione della connessione al database -->
         <properties>
