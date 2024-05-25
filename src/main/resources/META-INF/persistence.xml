@@ -13,6 +13,7 @@
         <class>io.resttestgen.database.Model.OperationCoverage</class>
         <class>io.resttestgen.database.Model.PathCoverage</class>
         <class>io.resttestgen.database.Model.StatusCodeCoverage</class>
+        <class>io.resttestgen.database.Model.ParameterCoverage</class>
 
         <!-- Proprietà di configurazione della connessione al database -->
         <properties>

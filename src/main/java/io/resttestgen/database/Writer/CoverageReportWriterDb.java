@@ -26,6 +26,8 @@ public class CoverageReportWriterDb {
 
     private StatusCodeCoverageRepository statusCodeCoverageRepository;
 
+    private ParameterCoverageRepository parameterCoverageRepository;
+
     private final CoverageManager coverageManager;
     private final Configuration configuration = Environment.getInstance().getConfiguration();
 
@@ -40,6 +42,7 @@ public class CoverageReportWriterDb {
         this.operationCoverageRepository = new OperationCoverageRepository();
         this.pathCoverageRepository = new PathCoverageRepository();
         this.statusCodeCoverageRepository = new StatusCodeCoverageRepository();
+        this.parameterCoverageRepository = new ParameterCoverageRepository();
     }
 
     public void writeSingleCoverage() {
@@ -55,13 +58,65 @@ public class CoverageReportWriterDb {
                 //writeSinglePathCoverage(coverage.getReportAsJsonObject());
             }
             else if(coverage.getClass().getSimpleName().equals("StatusCodeCoverage")){
-                System.out.println("Entro in sc");
-                writeSingleStatusCodeCoverage(coverage.getReportAsJsonObject());
+                //writeSingleStatusCodeCoverage(coverage.getReportAsJsonObject());
+            }else if(coverage.getClass().getSimpleName().equals("ParameterCoverage")){
+                writeSingleParameterCoverage(coverage.getReportAsJsonObject());
             }
 
 
         }
     }
+
+    private void writeSingleParameterCoverage(JsonObject reportAsJsonObject) {
+        JsonObject documented = reportAsJsonObject.getAsJsonObject("documented");
+        saveParameterCoverageData(documented, "documented", "ParameterCoverage");
+        JsonObject documentedTested = reportAsJsonObject.getAsJsonObject("documentedTested");
+        saveParameterCoverageData(documentedTested, "documentedTested", "ParameterCoverage");
+        JsonObject notDocumentedTested = reportAsJsonObject.getAsJsonObject("notDocumentedTested");
+        saveParameterCoverageData(notDocumentedTested, "notDocumentedTested", "ParameterCoverage");
+        JsonObject notTested = reportAsJsonObject.getAsJsonObject("notTested");
+        saveParameterCoverageData(notTested, "notTested", "ParameterCoverage");
+    }
+
+    private void saveParameterCoverageData(JsonObject data, String category, String covType) {
+
+        if (data != null) {
+            for (String endpointMethod : data.keySet()) {
+                JsonArray statusCodes = data.getAsJsonArray(endpointMethod);
+                String[] parts = endpointMethod.split(" ", 2);
+                if (parts.length == 2) {
+                    String method = parts[0];
+                    String endpoint = parts[1];
+
+                    boolean hasElements = false;
+                    for (JsonElement codeElement : statusCodes) {
+                        hasElements = true;
+                        String parameter = codeElement.getAsString();
+
+                        ParameterCoverage parameterCoverage = new ParameterCoverage();
+                        parameterCoverage.setCategory(category);
+                        parameterCoverage.setEndpoint(endpoint);
+                        parameterCoverage.setMethod(method);
+                        parameterCoverage.setJob(job);
+                        parameterCoverage.setParameter(parameter);
+
+                        parameterCoverageRepository.add(parameterCoverage);
+                    }
+
+                    if (!hasElements) {
+                        ParameterCoverage parameterCoverage = new ParameterCoverage();
+                        parameterCoverage.setCategory(category);
+                        parameterCoverage.setEndpoint(endpoint);
+                        parameterCoverage.setMethod(method);
+                        parameterCoverage.setJob(job);
+                        parameterCoverageRepository.add(parameterCoverage);
+                    }
+                }
+            }
+        }
+    }
+
+
 
     private void writeSingleStatusCodeCoverage(JsonObject reportAsJsonObject) {
         JsonObject documented = reportAsJsonObject.getAsJsonObject("documented");
