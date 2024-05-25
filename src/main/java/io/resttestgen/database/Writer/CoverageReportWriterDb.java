@@ -12,10 +12,7 @@ import io.resttestgen.database.Model.CoverageStat;
 import io.resttestgen.database.Model.OperationCoverage;
 import io.resttestgen.database.Model.Job;
 import io.resttestgen.database.Model.PathCoverage;
-import io.resttestgen.database.Repository.CoverageStatRepository;
-import io.resttestgen.database.Repository.JobRepository;
-import io.resttestgen.database.Repository.OperationCoverageRepository;
-import io.resttestgen.database.Repository.PathCoverageRepository;
+import io.resttestgen.database.Repository.*;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -30,6 +27,8 @@ public class CoverageReportWriterDb {
 
     private PathCoverageRepository pathCoverageRepository;
 
+    private StatusCodeCoverageRepository statusCodeCoverageRepository;
+
     private final CoverageManager coverageManager;
     private final Configuration configuration = Environment.getInstance().getConfiguration();
 
@@ -43,9 +42,12 @@ public class CoverageReportWriterDb {
         this.coverageManager = coverageManager;
         this.operationCoverageRepository = new OperationCoverageRepository();
         this.pathCoverageRepository = new PathCoverageRepository();
+        this.statusCodeCoverageRepository = new StatusCodeCoverageRepository();
     }
 
     public void writeSingleCoverage() {
+
+
         for (Coverage coverage : coverageManager.getCoverages()) {
 
 
@@ -55,17 +57,50 @@ public class CoverageReportWriterDb {
             else if(coverage.getClass().getSimpleName().equals("PathCoverage")){
                 //writeSinglePathCoverage(coverage.getReportAsJsonObject());
             }
-            else if(coverage.getClass().getSimpleName().equals("StatusCode")){
-
+            else if(coverage.getClass().getSimpleName().equals("StatusCodeCoverage")){
+                System.out.println("Entro in sc");
+                writeSingleStatusCodeCoverage(coverage.getReportAsJsonObject());
             }
 
 
         }
     }
 
+    private void writeSingleStatusCodeCoverage(JsonObject reportAsJsonObject) {
+        JsonObject documented = reportAsJsonObject.getAsJsonObject("documented");
+        saveStatusCodeCoverageData(documented, "documented", "PathCoverage");
+        JsonObject documentedTested = reportAsJsonObject.getAsJsonObject("documentedTested");
+        saveStatusCodeCoverageData(documentedTested, "documentedTested", "PathCoverage");
+        JsonObject notDocumentedTested = reportAsJsonObject.getAsJsonObject("notDocumentedTested");
+        saveStatusCodeCoverageData(notDocumentedTested, "notDocumentedTested", "PathCoverage");
+        JsonObject notTested = reportAsJsonObject.getAsJsonObject("notTested");
+        saveStatusCodeCoverageData(notTested, "notTested", "PathCoverage");
+    }
+
+    private void saveStatusCodeCoverageData(JsonObject data, String category, String covType) {
+
+        if (data != null) {
+            for (String endpointMethod : data.keySet()) {
+                JsonArray statusCodes = data.getAsJsonArray(endpointMethod);
+                String[] parts = endpointMethod.split(" ", 2);
+                if (parts.length == 2) {
+                    String method = parts[0];
+                    String endpoint = parts[1];
+                    for (JsonElement codeElement : statusCodes) {
+                        String statusCode = codeElement.getAsString();
+
+                        System.out.println("Category: "+category + " endpoint : "+endpoint + " method: "+method+" status Code "+statusCode + "\n");
+                        // Ora puoi salvare i dati come richiesto, ad esempio:
+                        //saveData(category, covType, method, endpoint, statusCode);
+                    }
+                }
+            }
+        }
+
+    }
+
+
     private void writeSinglePathCoverage(JsonObject reportAsJsonObject){
-
-
         JsonArray documented = reportAsJsonObject.getAsJsonArray("documented");
         savePathCoverageData(documented, "documented", "PathCoverage");
         JsonArray documentedTested = reportAsJsonObject.getAsJsonArray("documentedTested");
