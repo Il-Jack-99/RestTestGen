@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group 'io.resttestgen'
@@ -57,4 +58,21 @@ jar {
     manifest {
         attributes 'Main-Class': 'io.resttestgen.boot.cli.App'
     }
+}
+
+shadowJar {
+    archiveBaseName.set('RestTestGen')
+    archiveClassifier.set('')
+    archiveVersion.set('24.03')
+    manifest {
+        attributes 'Main-Class': 'io.resttestgen.boot.cli.App'
+    }
+    // Optional: Exclude external files if needed
+    exclude './apis/**'
+    exclude './rtg-config.yml'
+    exclude './Dockerfile'
+}
+
+tasks.build {
+    dependsOn shadowJar
 }
