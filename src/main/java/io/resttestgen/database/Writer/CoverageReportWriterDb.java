@@ -8,10 +8,7 @@ import io.resttestgen.core.Environment;
 import io.resttestgen.core.testing.Coverage;
 import io.resttestgen.core.testing.coverage.CoverageManager;
 //import io.resttestgen.core.testing.coverage.OperationCoverage;
-import io.resttestgen.database.Model.CoverageStat;
-import io.resttestgen.database.Model.OperationCoverage;
-import io.resttestgen.database.Model.Job;
-import io.resttestgen.database.Model.PathCoverage;
+import io.resttestgen.database.Model.*;
 import io.resttestgen.database.Repository.*;
 
 import java.nio.file.Path;
@@ -86,12 +83,23 @@ public class CoverageReportWriterDb {
                 if (parts.length == 2) {
                     String method = parts[0];
                     String endpoint = parts[1];
+
+                    StatusCodeCoverage statusCodeCoverage = new StatusCodeCoverage();
+                    statusCodeCoverage.setCategory(category);
+                    statusCodeCoverage.setEndpoint(endpoint);
+                    statusCodeCoverage.setMethod(method);
+                    statusCodeCoverage.setJob(job);
+                    boolean hasElements = false;
                     for (JsonElement codeElement : statusCodes) {
                         String statusCode = codeElement.getAsString();
 
-                        System.out.println("Category: "+category + " endpoint : "+endpoint + " method: "+method+" status Code "+statusCode + "\n");
-                        // Ora puoi salvare i dati come richiesto, ad esempio:
-                        //saveData(category, covType, method, endpoint, statusCode);
+                        statusCodeCoverage.setStatusCode(statusCode);
+                        statusCodeCoverageRepository.add(statusCodeCoverage);
+
+                    }
+
+                    if(!hasElements){
+                        statusCodeCoverageRepository.add(statusCodeCoverage);
                     }
                 }
             }
