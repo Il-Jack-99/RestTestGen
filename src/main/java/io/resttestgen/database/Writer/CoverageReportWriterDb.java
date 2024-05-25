@@ -28,6 +28,8 @@ public class CoverageReportWriterDb {
 
     private ParameterCoverageRepository parameterCoverageRepository;
 
+    private ParameterValueCoverageRepository parameterValueCoverageRepository;
+
     private final CoverageManager coverageManager;
     private final Configuration configuration = Environment.getInstance().getConfiguration();
 
@@ -43,6 +45,7 @@ public class CoverageReportWriterDb {
         this.pathCoverageRepository = new PathCoverageRepository();
         this.statusCodeCoverageRepository = new StatusCodeCoverageRepository();
         this.parameterCoverageRepository = new ParameterCoverageRepository();
+        this.parameterValueCoverageRepository = new ParameterValueCoverageRepository();
     }
 
     public void writeSingleCoverage() {
@@ -60,11 +63,68 @@ public class CoverageReportWriterDb {
             else if(coverage.getClass().getSimpleName().equals("StatusCodeCoverage")){
                 //writeSingleStatusCodeCoverage(coverage.getReportAsJsonObject());
             }else if(coverage.getClass().getSimpleName().equals("ParameterCoverage")){
-                writeSingleParameterCoverage(coverage.getReportAsJsonObject());
+                //writeSingleParameterCoverage(coverage.getReportAsJsonObject());
+            }
+            else if(coverage.getClass().getSimpleName().equals("ParameterValueCoverage")){
+                writeSingleParameterValueCoverage(coverage.getReportAsJsonObject());
             }
 
 
         }
+    }
+
+    private void writeSingleParameterValueCoverage(JsonObject reportAsJsonObject) {
+        JsonObject documented = reportAsJsonObject.getAsJsonObject("documented");
+        saveParameterValueCoverageData(documented, "documented", "ParameterValueCoverage");
+        JsonObject documentedTested = reportAsJsonObject.getAsJsonObject("documentedTested");
+        saveParameterValueCoverageData(documentedTested, "documentedTested", "ParameterValueCoverage");
+        JsonObject notDocumentedTested = reportAsJsonObject.getAsJsonObject("notDocumentedTested");
+        saveParameterValueCoverageData(notDocumentedTested, "notDocumentedTested", "ParameterValueCoverage");
+        JsonObject notTested = reportAsJsonObject.getAsJsonObject("notTested");
+        saveParameterValueCoverageData(notTested, "notTested", "ParameterValueCoverage");
+    }
+
+    private void saveParameterValueCoverageData(JsonObject data, String category, String covType) {
+        if (data != null) {
+            for (String endpointMethod : data.keySet()) {
+                JsonObject parameters = data.getAsJsonObject(endpointMethod);
+                String[] parts = endpointMethod.split(" ", 2);
+                if (parts.length == 2) {
+                    String method = parts[0];
+                    String endpoint = parts[1];
+
+                    boolean hasElements = false;
+                    for (String parameterName : parameters.keySet()) {
+                        JsonArray parameterValues = parameters.getAsJsonArray(parameterName);
+
+                        for (JsonElement valueElement : parameterValues) {
+                            hasElements = true;
+                            String parameterValue = valueElement.getAsString();
+
+                            ParameterValueCoverage parameterValueCoverage = new ParameterValueCoverage();
+                            parameterValueCoverage.setCategory(category);
+                            parameterValueCoverage.setEndpoint(endpoint);
+                            parameterValueCoverage.setMethod(method);
+                            parameterValueCoverage.setJob(job);
+                            parameterValueCoverage.setParameter(parameterName);
+                            parameterValueCoverage.setValue(parameterValue);
+
+                            parameterValueCoverageRepository.add(parameterValueCoverage);
+                        }
+                    }
+
+                    if (!hasElements) {
+                        ParameterValueCoverage parameterValueCoverage = new ParameterValueCoverage();
+                        parameterValueCoverage.setCategory(category);
+                        parameterValueCoverage.setEndpoint(endpoint);
+                        parameterValueCoverage.setMethod(method);
+                        parameterValueCoverage.setJob(job);
+                        parameterValueCoverageRepository.add(parameterValueCoverage);
+                    }
+                }
+            }
+        }
+
     }
 
     private void writeSingleParameterCoverage(JsonObject reportAsJsonObject) {
