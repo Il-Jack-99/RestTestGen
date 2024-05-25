@@ -26,5 +26,10 @@ public class RestAssuredRepository {
         return restAssured;
     }
 
+    public void close(){
+        this.entityManager.close();
+        this.emf.close();
+    }
+
 
 }

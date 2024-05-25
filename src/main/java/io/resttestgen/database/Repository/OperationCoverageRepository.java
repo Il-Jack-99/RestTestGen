@@ -23,4 +23,9 @@ public class OperationCoverageRepository {
         entityManager.getTransaction().commit();
         return operationCoverage;
     }
+
+    public void close(){
+        this.entityManager.close();
+        this.emf.close();
+    }
 }

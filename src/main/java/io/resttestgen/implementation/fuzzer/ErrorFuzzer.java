@@ -99,17 +99,13 @@ public class ErrorFuzzer extends Fuzzer {
                 errorStatusCodeOracle.assertTestSequence(currentTestSequence);
 
                 // Write report to file
-                try {
-                    ReportWriter reportWriter = new ReportWriter(currentTestSequence);
-                    reportWriter.write();
-                    reportWriterDb.write(currentTestSequence);
-                    RestAssuredWriter restAssuredWriter = new RestAssuredWriter(currentTestSequence);
-                    //restAssuredWriter.write();
-                    //restAssuredWriterDb.addToErrorMap(restAssuredWriter.testAssuredFileName(), restAssuredWriter.testAssuredContent());
-                    errorMap.put(restAssuredWriter.testAssuredFileName(), restAssuredWriter.testAssuredContent());
-                } catch (IOException e) {
-                    logger.warn("Could not write report to file.");
-                }
+                //ReportWriter reportWriter = new ReportWriter(currentTestSequence);
+                //reportWriter.write();
+                reportWriterDb.write(currentTestSequence);
+                RestAssuredWriter restAssuredWriter = new RestAssuredWriter(currentTestSequence);
+                //restAssuredWriter.write();
+                //restAssuredWriterDb.addToErrorMap(restAssuredWriter.testAssuredFileName(), restAssuredWriter.testAssuredContent());
+                errorMap.put(restAssuredWriter.testAssuredFileName(), restAssuredWriter.testAssuredContent());
 
                 testSequences.add(currentTestSequence);
             }

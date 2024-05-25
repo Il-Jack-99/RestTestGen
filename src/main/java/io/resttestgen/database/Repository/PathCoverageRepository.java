@@ -21,4 +21,9 @@ public class PathCoverageRepository {
         entityManager.getTransaction().commit();
         return pathCoverage;
     }
+
+    public void close(){
+        this.entityManager.close();
+        this.emf.close();
+    }
 }

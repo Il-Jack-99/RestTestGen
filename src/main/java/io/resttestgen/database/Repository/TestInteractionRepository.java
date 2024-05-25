@@ -26,4 +26,9 @@ public class TestInteractionRepository {
     public TestInteraction findById(Long id){
         return entityManager.find(TestInteraction.class, id);
     }
+
+    public void close(){
+        this.entityManager.close();
+        this.emf.close();
+    }
 }

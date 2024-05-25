@@ -22,4 +22,9 @@ public class TestResultRepository {
         entityManager.getTransaction().commit();
         return testResult;
     }
+
+    public void close(){
+        this.entityManager.close();
+        this.emf.close();
+    }
 }

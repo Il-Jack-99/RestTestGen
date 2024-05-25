@@ -22,4 +22,9 @@ public class StatusCodeCoverageRepository {
         return statusCodeCoverage;
     }
 
+    public void close(){
+        this.entityManager.close();
+        this.emf.close();
+    }
+
 }

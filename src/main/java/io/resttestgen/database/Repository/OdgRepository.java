@@ -24,4 +24,9 @@ public class OdgRepository {
         entityManager.getTransaction().commit();
         return odg;
     }
+
+    public void close(){
+        this.entityManager.close();
+        this.emf.close();
+    }
 }

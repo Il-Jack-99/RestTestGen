@@ -23,4 +23,9 @@ public class ParameterCoverageRepository {
         entityManager.getTransaction().commit();
         return parameterCoverage;
     }
+
+    public void close(){
+        this.entityManager.close();
+        this.emf.close();
+    }
 }

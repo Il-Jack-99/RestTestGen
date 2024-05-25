@@ -23,6 +23,10 @@ public class RestAssuredWriterDb {
     private Map<String, String> errorMap;
     private RestAssuredRepository restAssuredRepository;
 
+    public void closeAllRepository(){
+        restAssuredRepository.close();
+    }
+
     public void getErrorMap() {
 
         errorMap.forEach((key, value) -> {

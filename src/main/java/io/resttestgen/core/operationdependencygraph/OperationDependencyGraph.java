@@ -97,6 +97,7 @@ public class OperationDependencyGraph {
 
         odgRepository.add(dbOdg);
         jobRepository.close();
+        odgRepository.close();
 
         writer.flush();
         writer.close();

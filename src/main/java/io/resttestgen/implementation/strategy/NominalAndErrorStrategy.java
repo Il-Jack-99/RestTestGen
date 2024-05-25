@@ -13,14 +13,13 @@ import io.resttestgen.implementation.fuzzer.NominalFuzzer;
 import io.resttestgen.implementation.operationssorter.GraphBasedOperationsSorter;
 import io.resttestgen.implementation.oracle.StatusCodeOracle;
 import io.resttestgen.implementation.writer.CoverageReportWriter;
-import io.resttestgen.implementation.writer.ReportWriter;
 import io.resttestgen.implementation.writer.RestAssuredWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
+
 
 @SuppressWarnings("unused")
 public class NominalAndErrorStrategy extends Strategy {
@@ -56,25 +55,16 @@ public class NominalAndErrorStrategy extends Strategy {
                 statusCodeOracle.assertTestSequence(testSequence);
 
                 // Write report to file
-                try {
-                    ReportWriter reportWriter = new ReportWriter(testSequence);
-                    reportWriter.write();
-                    //todo
-                    //reportWriterDb.write(testSequence);
+                //ReportWriter reportWriter = new ReportWriter(testSequence);
+                //reportWriter.write();
+                reportWriterDb.write(testSequence);
 
 
-                    RestAssuredWriter restAssuredWriter = new RestAssuredWriter(testSequence);
-                    //restAssuredWriter.write();
+                RestAssuredWriter restAssuredWriter = new RestAssuredWriter(testSequence);
+                //restAssuredWriter.write();
+                restAssuredWriterDb.addToNominalMap(restAssuredWriter.testAssuredFileName(), restAssuredWriter.testAssuredContent() );
 
 
-                    restAssuredWriterDb.addToNominalMap(restAssuredWriter.testAssuredFileName(), restAssuredWriter.testAssuredContent() );
-
-
-
-                } catch (IOException e) {
-                    logger.warn("Could not write report to file.");
-                    e.printStackTrace();
-                }
             }
             globalNominalTestSequence.append(nominalSequences);
             sorter.removeFirst();
@@ -98,8 +88,11 @@ public class NominalAndErrorStrategy extends Strategy {
         restAssuredWriterDb.writeError();
 
         restAssuredWriterDb.getErrorMap();
-        //todo
-        //restAssuredWriterDb.write();
+
+        restAssuredWriterDb.write();
+
+        reportWriterDb.closeAllRepository();
+        restAssuredWriterDb.closeAllRepository();
 
         try {
             CoverageReportWriter coverageReportWriter = new CoverageReportWriter(TestRunner.getInstance().getCoverage());
@@ -107,11 +100,15 @@ public class NominalAndErrorStrategy extends Strategy {
 
             coverageReportWriterDb = new CoverageReportWriterDb(TestRunner.getInstance().getCoverage());
             coverageReportWriterDb.writeSingleCoverage();
-            //coverageReportWriterDb.writeStats();
+            coverageReportWriterDb.writeStats();
+
+            coverageReportWriterDb.closeAllRepository();
 
         } catch (IOException e) {
             logger.warn("Could not write Coverage report to file.");
             e.printStackTrace();
         }
+
+
     }
 }

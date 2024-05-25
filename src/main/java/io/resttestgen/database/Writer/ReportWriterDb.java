@@ -26,6 +26,12 @@ public class ReportWriterDb {
 
     private TestResultRepository testResultRepository;
 
+    public void closeAllRepository(){
+        testSequenceRepository.close();
+        testInteractionRepository.close();
+        testResultRepository.close();
+    }
+
     public ReportWriterDb(){
         JobRepository jobRepository = new JobRepository();
         this.job = jobRepository.findFromFileById();

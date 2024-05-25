@@ -34,6 +34,15 @@ public class CoverageReportWriterDb {
     private final Configuration configuration = Environment.getInstance().getConfiguration();
 
 
+    public void closeAllRepository(){
+        coverageStatRepository.close();
+        operationCoverageRepository.close();
+        pathCoverageRepository.close();
+        statusCodeCoverageRepository.close();
+        parameterCoverageRepository.close();
+        parameterValueCoverageRepository.close();
+    }
+
     public CoverageReportWriterDb(CoverageManager coverageManager){
         JobRepository jobRepository = new JobRepository();
         this.job = jobRepository.findFromFileById();
@@ -55,15 +64,15 @@ public class CoverageReportWriterDb {
 
 
             if(coverage.getClass().getSimpleName().equals("OperationCoverage")){
-                //writeSingleOperationCoverage(coverage.getReportAsJsonObject());
+                writeSingleOperationCoverage(coverage.getReportAsJsonObject());
             }
             else if(coverage.getClass().getSimpleName().equals("PathCoverage")){
-                //writeSinglePathCoverage(coverage.getReportAsJsonObject());
+                writeSinglePathCoverage(coverage.getReportAsJsonObject());
             }
             else if(coverage.getClass().getSimpleName().equals("StatusCodeCoverage")){
-                //writeSingleStatusCodeCoverage(coverage.getReportAsJsonObject());
+                writeSingleStatusCodeCoverage(coverage.getReportAsJsonObject());
             }else if(coverage.getClass().getSimpleName().equals("ParameterCoverage")){
-                //writeSingleParameterCoverage(coverage.getReportAsJsonObject());
+                writeSingleParameterCoverage(coverage.getReportAsJsonObject());
             }
             else if(coverage.getClass().getSimpleName().equals("ParameterValueCoverage")){
                 writeSingleParameterValueCoverage(coverage.getReportAsJsonObject());
