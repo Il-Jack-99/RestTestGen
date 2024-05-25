@@ -75,7 +75,6 @@ public class CoverageReportWriterDb {
     }
 
     private void saveStatusCodeCoverageData(JsonObject data, String category, String covType) {
-
         if (data != null) {
             for (String endpointMethod : data.keySet()) {
                 JsonArray statusCodes = data.getAsJsonArray(endpointMethod);
@@ -84,27 +83,32 @@ public class CoverageReportWriterDb {
                     String method = parts[0];
                     String endpoint = parts[1];
 
-                    StatusCodeCoverage statusCodeCoverage = new StatusCodeCoverage();
-                    statusCodeCoverage.setCategory(category);
-                    statusCodeCoverage.setEndpoint(endpoint);
-                    statusCodeCoverage.setMethod(method);
-                    statusCodeCoverage.setJob(job);
                     boolean hasElements = false;
                     for (JsonElement codeElement : statusCodes) {
+                        hasElements = true;
                         String statusCode = codeElement.getAsString();
 
+                        StatusCodeCoverage statusCodeCoverage = new StatusCodeCoverage();
+                        statusCodeCoverage.setCategory(category);
+                        statusCodeCoverage.setEndpoint(endpoint);
+                        statusCodeCoverage.setMethod(method);
+                        statusCodeCoverage.setJob(job);
                         statusCodeCoverage.setStatusCode(statusCode);
-                        statusCodeCoverageRepository.add(statusCodeCoverage);
 
+                        statusCodeCoverageRepository.add(statusCodeCoverage);
                     }
 
-                    if(!hasElements){
+                    if (!hasElements) {
+                        StatusCodeCoverage statusCodeCoverage = new StatusCodeCoverage();
+                        statusCodeCoverage.setCategory(category);
+                        statusCodeCoverage.setEndpoint(endpoint);
+                        statusCodeCoverage.setMethod(method);
+                        statusCodeCoverage.setJob(job);
                         statusCodeCoverageRepository.add(statusCodeCoverage);
                     }
                 }
             }
         }
-
     }
 
 
