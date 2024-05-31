@@ -67,7 +67,7 @@ tasks.build {
 // Task per creare il file persistence.xml
 task createPersistenceXml {
     doLast {
-        def dockerIpHost = System.getenv('DOCKER_IP_HOST')
+        def dockerIpHost = System.getenv('DIH')
         println "DOCKER_IP_HOST: ${dockerIpHost}"
         def jdbcUrl = "jdbc:postgresql://${dockerIpHost}:5432/RTG_Demo"
 
