@@ -17,36 +17,23 @@ repositories {
 
 dependencies {
     implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
-
     implementation 'com.google.code.gson:gson:2.10'
     implementation 'org.yaml:snakeyaml:2.0'
-
     implementation 'com.google.guava:guava:31.1-jre'
-
     implementation 'org.jgrapht:jgrapht-core:1.5.1'
     implementation 'org.jgrapht:jgrapht-io:1.5.1'
-
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
-
     implementation 'org.apache.opennlp:opennlp-tools:1.9.4'
     implementation 'com.jayway.jsonpath:json-path:2.7.0'
-
     implementation 'com.github.mifmif:generex:1.0.2'
     implementation 'org.iban4j:iban4j:3.2.3-RELEASE'
-
     implementation 'nz.ac.waikato.cms.weka:weka-stable:3.8.6'
-
     implementation 'javax.persistence:javax.persistence-api:2.2'
     implementation 'org.hibernate:hibernate-core:5.6.5.Final'
     implementation 'org.postgresql:postgresql:42.2.10'
-
-
-
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
-
     implementation 'com.mageddo.lombok:lombok-ext:2.3.0'
 }
 
@@ -75,4 +62,83 @@ shadowJar {
 
 tasks.build {
     dependsOn shadowJar
+}
+
+// Task per creare il file persistence.xml
+task createPersistenceXml {
+    doLast {
+        def dockerIpHost = System.getenv('DOCKER_IP_HOST') ?: 'localhost'
+        def jdbcUrl = "jdbc:postgresql://${dockerIpHost}:5432/RTG_Demo"
+
+        def properties = [
+                'javax.persistence.jdbc.url'     : jdbcUrl,
+                'javax.persistence.jdbc.driver'  : 'org.postgresql.Driver',
+                'javax.persistence.jdbc.user'    : 'postgres',
+                'javax.persistence.jdbc.password': 'Passw0rd',
+                'hibernate.dialect'              : 'org.hibernate.dialect.PostgresPlusDialect',
+                'hibernate.show_sql'             : 'true',
+                'hibernate.format_sql'           : 'true'
+        ]
+
+        def entityClasses = [
+                'io.resttestgen.database.Model.Job',
+                'io.resttestgen.database.Model.TestInteraction',
+                'io.resttestgen.database.Model.TestResult',
+                'io.resttestgen.database.Model.TestSequence',
+                'io.resttestgen.database.Model.RestAssured',
+                'io.resttestgen.database.Model.Odg',
+                'io.resttestgen.database.Model.CoverageStat',
+                'io.resttestgen.database.Model.OperationCoverage',
+                'io.resttestgen.database.Model.PathCoverage',
+                'io.resttestgen.database.Model.StatusCodeCoverage',
+                'io.resttestgen.database.Model.ParameterCoverage',
+                'io.resttestgen.database.Model.ParameterValueCoverage'
+        ]
+
+        def persistenceXmlContent = new StringBuilder()
+        persistenceXmlContent.append('<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="2.0">')
+                .append('<persistence-unit name="rtg_pu" transaction-type="RESOURCE_LOCAL">')
+                .append('<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>')
+
+        entityClasses.each { className ->
+            persistenceXmlContent.append('<class>').append(className).append('</class>')
+        }
+
+        persistenceXmlContent.append('<properties>')
+        properties.each { key, value ->
+            persistenceXmlContent.append('<property name="').append(key).append('" value="').append(value).append('"/>')
+        }
+        persistenceXmlContent.append('</properties>')
+
+        persistenceXmlContent.append('</persistence-unit>')
+                .append('</persistence>')
+
+        def persistenceDir = file("$buildDir/resources/main/META-INF")
+        def persistenceFile = file("$persistenceDir/persistence.xml")
+
+        if (!persistenceDir.exists()) {
+            persistenceDir.mkdirs()
+        }
+
+        persistenceFile.text = persistenceXmlContent.toString()
+    }
+}
+
+// Imposta le dipendenze tra i task
+tasks.run {
+    dependsOn createPersistenceXml
+}
+
+tasks.shadowJar {
+    dependsOn createPersistenceXml
+}
+
+// Ensure persistence.xml is created when running the jar
+applicationDefaultJvmArgs = ["-DcreatePersistenceXml=true"]
+
+// This part ensures the task runs when the application is executed via 'java -jar'
+tasks.withType(JavaExec) {
+    if (System.getProperty("createPersistenceXml") == "true") {
+        finalizedBy createPersistenceXml
+    }
 }

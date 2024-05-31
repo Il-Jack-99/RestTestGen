@@ -9,7 +9,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Properties;
 
 /**
  * CLI application
@@ -38,6 +40,7 @@ public class App {
         // Set logger verbosity to INFO and welcome user
         Configurator.setRootLevel(Level.INFO);
         logger.info(messageHeader + " started.");
+
 
         // Configuration: the constructor loads the configuration from file, if available, or uses default
         Configuration configuration;
@@ -110,4 +113,8 @@ public class App {
             configuration.setStrategyClassName(cmd.valueOf("-s"));
         }
     }
+
+
+
+
 }
