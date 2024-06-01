@@ -20,7 +20,7 @@
         <properties>
             <!-- URL del database -->
 
-            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://${DOCKER_IP_HOST:localhost}:5432/RTG_Demo"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://host.docker.internal:5432/RTG_Demo"/>
             <!-- Driver JDBC -->
             <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
             <!-- Utente del database -->
