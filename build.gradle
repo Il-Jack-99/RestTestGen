@@ -2,13 +2,15 @@ plugins {
     id 'java'
     id 'application'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'org.springframework.boot' version '2.5.14' // Usa Spring Boot 2.x per Java 1.8
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 }
 
 group 'io.resttestgen'
 version '24.03'
 
 application {
-    mainClass.set('io.resttestgen.boot.cli.App')
+    mainClass.set('io.resttestgen.boot.cli.MainApp') // Cambia la main class se necessario
 }
 
 repositories {
@@ -17,37 +19,33 @@ repositories {
 
 dependencies {
     implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
-
     implementation 'com.google.code.gson:gson:2.10'
     implementation 'org.yaml:snakeyaml:2.0'
-
     implementation 'com.google.guava:guava:31.1-jre'
-
     implementation 'org.jgrapht:jgrapht-core:1.5.1'
     implementation 'org.jgrapht:jgrapht-io:1.5.1'
-
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
-
     implementation 'org.apache.opennlp:opennlp-tools:1.9.4'
     implementation 'com.jayway.jsonpath:json-path:2.7.0'
-
     implementation 'com.github.mifmif:generex:1.0.2'
     implementation 'org.iban4j:iban4j:3.2.3-RELEASE'
-
     implementation 'nz.ac.waikato.cms.weka:weka-stable:3.8.6'
-
     implementation 'javax.persistence:javax.persistence-api:2.2'
-    implementation 'org.hibernate:hibernate-core:5.6.5.Final'
-    implementation 'org.postgresql:postgresql:42.2.10'
 
-
+    // Aggiungi Spring Data MongoDB e il web starter di Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-
     implementation 'com.mageddo.lombok:lombok-ext:2.3.0'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 test {
@@ -56,7 +54,7 @@ test {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'io.resttestgen.boot.cli.App'
+        attributes 'Main-Class': 'io.resttestgen.boot.cli.MainApp'
     }
 }
 
@@ -65,9 +63,8 @@ shadowJar {
     archiveClassifier.set('')
     archiveVersion.set('24.03')
     manifest {
-        attributes 'Main-Class': 'io.resttestgen.boot.cli.App'
+        attributes 'Main-Class': 'io.resttestgen.boot.cli.MainApp'
     }
-    // Optional: Exclude external files if needed
     exclude './apis/**'
     exclude './rtg-config.yml'
     exclude './Dockerfile'
