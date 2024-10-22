@@ -1,32 +1,35 @@
 package io.resttestgen.database.Repository;
 
+
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import io.resttestgen.database.Model.Odg;
-import io.resttestgen.database.Model.RestAssured;
+import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
+@Repository
 public class OdgRepository {
 
-    private EntityManager entityManager;
-    private EntityManagerFactory emf;
+    @Autowired
+    private MongoDatabase mongoDatabase;  // MongoDatabase iniettato
 
-    public OdgRepository() {
-        this.emf = Persistence.createEntityManagerFactory("rtg_pu");
-        this.entityManager = this.emf.createEntityManager();
+    private static final String COLLECTION_NAME = "odg";  // Nome della collection MongoDB
 
+    // Metodo per aggiungere un Oggetto 'Odg' nella collection 'odg'
+    public Odg add(Odg odg) {
+        MongoCollection<Document> collection = mongoDatabase.getCollection(COLLECTION_NAME);
+
+        Document odgDoc = new Document("id", odg.getId())
+                .append("description", odg.getDescription())
+                .append("type", odg.getType());
+
+        collection.insertOne(odgDoc);
+        return odg;  // Restituisce l'oggetto salvato
     }
 
-    public Odg add(Odg odg){
-        entityManager.getTransaction().begin();
-        entityManager.persist(odg);
-        entityManager.getTransaction().commit();
-        return odg;
-    }
-
-    public void close(){
-        this.entityManager.close();
-        this.emf.close();
+    // Metodo per chiudere la connessione (non necessario in MongoDB)
+    public void close() {
+        // MongoDB gestisce automaticamente la connessione
     }
 }

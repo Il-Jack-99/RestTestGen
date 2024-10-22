@@ -10,7 +10,7 @@ group 'io.resttestgen'
 version '24.03'
 
 application {
-    mainClass.set('io.resttestgen.boot.cli.MainApp') // Cambia la main class se necessario
+    mainClass.set('io.resttestgen.boot.cli.App') // Cambia la main class se necessario
 }
 
 repositories {
@@ -19,11 +19,17 @@ repositories {
 
 dependencies {
     implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
+
     implementation 'com.google.code.gson:gson:2.10'
     implementation 'org.yaml:snakeyaml:2.0'
     implementation 'com.google.guava:guava:31.1-jre'
     implementation 'org.jgrapht:jgrapht-core:1.5.1'
     implementation 'org.jgrapht:jgrapht-io:1.5.1'
+
+
+
+
+
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'org.apache.opennlp:opennlp-tools:1.9.4'
     implementation 'com.jayway.jsonpath:json-path:2.7.0'
@@ -41,6 +47,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     implementation 'com.mageddo.lombok:lombok-ext:2.3.0'
+
 }
 
 java {

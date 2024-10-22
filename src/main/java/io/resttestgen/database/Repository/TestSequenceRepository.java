@@ -1,40 +1,47 @@
 package io.resttestgen.database.Repository;
 
-
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import io.resttestgen.database.Model.TestSequence;
+import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
-
+@Repository
 public class TestSequenceRepository {
 
-    private EntityManager entityManager;
-    private EntityManagerFactory emf;
+    @Autowired
+    private MongoDatabase mongoDatabase;  // MongoDatabase iniettato tramite Spring
 
-    public TestSequenceRepository() {
-        this.emf = Persistence.createEntityManagerFactory("rtg_pu");
-        this.entityManager = this.emf.createEntityManager();
+    private static final String COLLECTION_NAME = "testSequences";
+
+    // Salva una TestSequence nel database MongoDB
+    public void add(TestSequence testSequence) {
+        MongoCollection<Document> collection = mongoDatabase.getCollection(COLLECTION_NAME);
+
+        Document testSequenceDoc = new Document("id", testSequence.getId())
+                .append("jobId", testSequence.getJob().getId())
+                .append("name", testSequence.getName());
+
+        collection.insertOne(testSequenceDoc);
     }
 
-    public TestSequence add(TestSequence testSequence) {
-        entityManager.getTransaction().begin();
-        entityManager.persist(testSequence);
-        entityManager.getTransaction().commit();
-        return testSequence;
+    // Trova una TestSequence per ID
+    public TestSequence findById(Long id) {
+        MongoCollection<Document> collection = mongoDatabase.getCollection(COLLECTION_NAME);
+        Document query = new Document("id", id);
+        Document testSequenceDoc = collection.find(query).first();
+
+        if (testSequenceDoc != null) {
+            TestSequence testSequence = new TestSequence();
+            testSequence.setId(testSequenceDoc.getLong("id"));
+            testSequence.setName(testSequenceDoc.getString("name"));
+            // Recupera il Job associato alla TestSequence (da un altro repository, se necessario)
+            // Puoi gestire il mapping di Job qui
+            return testSequence;
+        }
+        return null;
     }
 
-
-
-
-    public TestSequence findById(Long id){
-        return entityManager.find(TestSequence.class, id);
-    }
-
-
-
-    public void close() {
-        emf.close();
-    }
+    // Altri metodi CRUD, se necessari
 }

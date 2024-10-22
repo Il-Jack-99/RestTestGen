@@ -6,8 +6,7 @@ import io.resttestgen.core.datatype.NormalizedParameterName;
 import io.resttestgen.core.datatype.parameter.Parameter;
 import io.resttestgen.core.openapi.OpenApi;
 import io.resttestgen.core.openapi.Operation;
-import io.resttestgen.database.Model.Job;
-import io.resttestgen.database.Model.Odg;
+
 import io.resttestgen.database.Repository.JobRepository;
 import io.resttestgen.database.Repository.OdgRepository;
 import org.apache.logging.log4j.LogManager;
@@ -88,16 +87,16 @@ public class OperationDependencyGraph {
         // Stampa l'ODG
         String odg_to_save = writer.toString();
 
-        Job job = new Job();
-        job = jobRepository.findFromFileById();
+        //Job job = new Job();
+        //job = jobRepository.findFromFileById();
 
-        Odg dbOdg = new Odg();
-        dbOdg.setOdg(odg_to_save);
-        dbOdg.setJob(job);
+        //Odg dbOdg = new Odg();
+        //dbOdg.setOdg(odg_to_save);
+        //dbOdg.setJob(job);
 
-        odgRepository.add(dbOdg);
-        jobRepository.close();
-        odgRepository.close();
+        //odgRepository.add(dbOdg);
+        //jobRepository.close();
+        //odgRepository.close();
 
         writer.flush();
         writer.close();

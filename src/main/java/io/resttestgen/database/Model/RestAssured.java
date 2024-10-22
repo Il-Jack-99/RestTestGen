@@ -1,36 +1,36 @@
 package io.resttestgen.database.Model;
 
 
-import javax.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
-
-@Entity
-@Table(name = "rest_assured")
+@Document(collection = "rest_assured")
 public class RestAssured {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "error_file")
-    private byte[] errorFile;
-
-    @Column(name = "nominal_file")
-    private byte[] nominalFile;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "job_id", nullable = false)
+    @DBRef
     private Job job;
 
-
-    @Column(name = "error_file_name")
-    private String errorFileName;
-
-    @Column(name = "nominal_file_name")
     private String nominalFileName;
+    private byte[] nominalFile;
 
-    public RestAssured(){
+    private String errorFileName;
+    private byte[] errorFile;
 
+    // Costruttori, getter e setter
+    public RestAssured() {
+    }
+
+    public RestAssured(Long id, Job job, String nominalFileName, byte[] nominalFile, String errorFileName, byte[] errorFile) {
+        this.id = id;
+        this.job = job;
+        this.nominalFileName = nominalFileName;
+        this.nominalFile = nominalFile;
+        this.errorFileName = errorFileName;
+        this.errorFile = errorFile;
     }
 
     public Long getId() {
@@ -41,36 +41,12 @@ public class RestAssured {
         this.id = id;
     }
 
-    public byte[] getErrorFile() {
-        return errorFile;
-    }
-
-    public void setErrorFile(byte[] errorFile) {
-        this.errorFile = errorFile;
-    }
-
-    public byte[] getNominalFile() {
-        return nominalFile;
-    }
-
-    public void setNominalFile(byte[] nominalFile) {
-        this.nominalFile = nominalFile;
-    }
-
     public Job getJob() {
         return job;
     }
 
     public void setJob(Job job) {
         this.job = job;
-    }
-
-    public String getErrorFileName() {
-        return errorFileName;
-    }
-
-    public void setErrorFileName(String errorFileName) {
-        this.errorFileName = errorFileName;
     }
 
     public String getNominalFileName() {
@@ -81,5 +57,27 @@ public class RestAssured {
         this.nominalFileName = nominalFileName;
     }
 
+    public byte[] getNominalFile() {
+        return nominalFile;
+    }
 
+    public void setNominalFile(byte[] nominalFile) {
+        this.nominalFile = nominalFile;
+    }
+
+    public String getErrorFileName() {
+        return errorFileName;
+    }
+
+    public void setErrorFileName(String errorFileName) {
+        this.errorFileName = errorFileName;
+    }
+
+    public byte[] getErrorFile() {
+        return errorFile;
+    }
+
+    public void setErrorFile(byte[] errorFile) {
+        this.errorFile = errorFile;
+    }
 }

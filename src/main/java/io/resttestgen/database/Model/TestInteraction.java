@@ -1,18 +1,36 @@
 package io.resttestgen.database.Model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+
 import java.sql.Timestamp;
-import java.time.Instant;
 
-@Entity
-@Table(name = "test_interaction")
+@Document(collection = "test_interaction")  // Indica che questa classe è un documento MongoDB
 public class TestInteraction {
+
+    @Id  // Identificativo del documento
+    private Long id;
+
+    private Timestamp executionTime;
+    private String requestBody;
+    private String requestHeader;
+    private String requestMethod;
+    private Timestamp requestSentAt;
+    private String requestUrl;
+    private String responseBody;
+    private String responseHeaders;
+    private String responseProtocol;
+    private Timestamp responseReceivedAt;
+    private String responseStatusCode;
+    private String testStatus;
+
+    @DBRef  // Riferimento alla sequenza di test associata
+    private TestSequence sequence;
+
+    // Costruttori, getter e setter
+
     public Long getId() {
         return id;
     }
@@ -125,20 +143,16 @@ public class TestInteraction {
         this.sequence = sequence;
     }
 
-    public TestInteraction(){
-
-    }
-
     @Override
     public String toString() {
         return "TestInteraction{" +
                 "id=" + id +
-                ", executionTime='" + executionTime + '\'' +
+                ", executionTime=" + executionTime +
                 ", requestBody='" + requestBody + '\'' +
                 ", requestHeader='" + requestHeader + '\'' +
                 ", requestMethod='" + requestMethod + '\'' +
                 ", requestSentAt=" + requestSentAt +
-                ", requesturl='" + requestUrl + '\'' +
+                ", requestUrl='" + requestUrl + '\'' +
                 ", responseBody='" + responseBody + '\'' +
                 ", responseHeaders='" + responseHeaders + '\'' +
                 ", responseProtocol='" + responseProtocol + '\'' +
@@ -148,57 +162,5 @@ public class TestInteraction {
                 ", sequence=" + sequence +
                 '}';
     }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id;
-
-    @Column(name = "execution_time")
-    private Timestamp executionTime;
-
-    @Column(name = "request_body", columnDefinition = "TEXT")
-    private String requestBody;
-
-    @Column(name = "request_header", columnDefinition = "TEXT")
-    private String requestHeader;
-
-
-    @Column(name = "request_method")
-    private String requestMethod;
-
-    @Column(name = "request_sent_at")
-    private Timestamp requestSentAt;
-
-
-    @Column(name = "request_url")
-    private String requestUrl;
-
-
-    @Column(name = "response_body", columnDefinition = "TEXT")
-    private String responseBody;
-
-    @Column(name = "response_header", columnDefinition = "TEXT")
-    private String responseHeaders;
-
-
-    @Column(name = "response_protocol")
-    private String responseProtocol;
-
-    @Column(name = "response_received_at")
-    private Timestamp responseReceivedAt;
-
-
-    @Column(name = "response_status_code")
-    private String responseStatusCode;
-
-
-    @Column(name = "test_status")
-    private String testStatus;
-
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sequence_id")
-    private TestSequence sequence;
-
 }
+

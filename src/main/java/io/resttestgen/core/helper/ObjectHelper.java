@@ -18,7 +18,7 @@ public class ObjectHelper {
             return o;
         } else {
             String json = new Gson().toJson(o);
-            return new Gson().fromJson(json, new TypeToken<>() {
+            return new Gson().fromJson(json, new TypeToken<T>() {
             }.getType());
         }
     }

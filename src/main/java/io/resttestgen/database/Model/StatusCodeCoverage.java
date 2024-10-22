@@ -1,43 +1,35 @@
 package io.resttestgen.database.Model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.Setter;
 
-import javax.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
-
-@Entity
-@Table(name = "status_code_coverage")
+@Document(collection = "status_code_coverage")
 public class StatusCodeCoverage {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Long id;
 
-
-    @Column(name = "category")
-    private String category;
-
-
-    @Column(name = "endpoint")
-    private String endpoint;
-
-
-    @Column(name = "method")
-    private String method;
-
-
-    @Column(name = "status_code")
-    private String statusCode;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "job_id", nullable = false)
-    @JsonIgnore
+    @DBRef
     private Job job;
 
-    public StatusCodeCoverage(){
+    private String category;
+    private String endpoint;
+    private String method;
+    private String statusCode;
 
+    // Costruttori, getter e setter
+    public StatusCodeCoverage() {
+    }
+
+    public StatusCodeCoverage(Long id, Job job, String category, String endpoint, String method, String statusCode) {
+        this.id = id;
+        this.job = job;
+        this.category = category;
+        this.endpoint = endpoint;
+        this.method = method;
+        this.statusCode = statusCode;
     }
 
     public Long getId() {
@@ -46,6 +38,14 @@ public class StatusCodeCoverage {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Job getJob() {
+        return job;
+    }
+
+    public void setJob(Job job) {
+        this.job = job;
     }
 
     public String getCategory() {
@@ -79,13 +79,4 @@ public class StatusCodeCoverage {
     public void setStatusCode(String statusCode) {
         this.statusCode = statusCode;
     }
-
-    public Job getJob() {
-        return job;
-    }
-
-    public void setJob(Job job) {
-        this.job = job;
-    }
-
 }

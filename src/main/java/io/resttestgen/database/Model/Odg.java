@@ -1,31 +1,29 @@
 package io.resttestgen.database.Model;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-
-@Entity
-@Table(name = "odg")
+@Document(collection = "odg")  // Indica che questa classe è un documento MongoDB
 public class Odg {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id  // Identificativo del documento
     private Long id;
+    private String description;
+    private String type;
 
-    @Column(name = "odg")
-    @Type(type = "org.hibernate.type.TextType")
-    private String odg;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "job_id", nullable = false)
-    private Job job;
-
-    public Odg(){
-
+    // Costruttore vuoto
+    public Odg() {
     }
 
+    // Costruttore completo
+    public Odg(Long id, String description, String type) {
+        this.id = id;
+        this.description = description;
+        this.type = type;
+    }
+
+    // Getter e Setter
     public Long getId() {
         return id;
     }
@@ -34,20 +32,28 @@ public class Odg {
         this.id = id;
     }
 
-    public String getOdg() {
-        return odg;
+    public String getDescription() {
+        return description;
     }
 
-    public void setOdg(String odg) {
-        this.odg = odg;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public Job getJob() {
-        return job;
+    public String getType() {
+        return type;
     }
 
-    public void setJob(Job job) {
-        this.job = job;
+    public void setType(String type) {
+        this.type = type;
     }
 
+    @Override
+    public String toString() {
+        return "Odg{" +
+                "id=" + id +
+                ", description='" + description + '\'' +
+                ", type='" + type + '\'' +
+                '}';
+    }
 }

@@ -1,52 +1,47 @@
 package io.resttestgen.database.Model;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.*;
-import java.sql.Timestamp;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name = "job")
+@Document(collection = "jobs")  // Indica che questa classe è un documento MongoDB
 public class Job {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+
+    @Id  // Identificativo del documento
     private Long id;
+    private String jobName;
 
-    @Column(name = "auth_token")
-    private String authToken;
+    // Costruttore vuoto
+    public Job() {
+    }
 
-    @Column(name = "description")
-    private String description;
+    // Costruttore completo
+    public Job(Long id, String jobName) {
+        this.id = id;
+        this.jobName = jobName;
+    }
 
-    @Column(name = "job_state", nullable = false, length = 50)
-    private String jobState;
+    // Getter e Setter
+    public Long getId() {
+        return id;
+    }
 
-    @Column(name = "strategy_name")
-    private String strategyName;
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    @Column(name = "timestamp_end")
-    private Timestamp timestampEnd;
+    public String getJobName() {
+        return jobName;
+    }
 
-    @Column(name = "timestamp_start")
-    private Timestamp timestampStart;
+    public void setJobName(String jobName) {
+        this.jobName = jobName;
+    }
 
     @Override
     public String toString() {
         return "Job{" +
                 "id=" + id +
-                ", authToken='" + authToken + '\'' +
-                ", description='" + description + '\'' +
-                ", jobState='" + jobState + '\'' +
-                ", strategyName='" + strategyName + '\'' +
-                ", timestampEnd=" + timestampEnd +
-                ", timestampStart=" + timestampStart +
+                ", jobName='" + jobName + '\'' +
                 '}';
     }
-
 }

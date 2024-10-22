@@ -1,5 +1,7 @@
 package io.resttestgen.database.Repository;
 
+
+
 import io.resttestgen.database.Model.CoverageStat;
 
 import javax.persistence.EntityManager;

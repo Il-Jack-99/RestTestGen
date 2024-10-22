@@ -1,43 +1,35 @@
 package io.resttestgen.database.Model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-import javax.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+
 import java.sql.Timestamp;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-@Entity
-@Table(name = "test_sequence")
+@Document(collection = "test_sequence")  // Indica che questa classe è un documento MongoDB
 public class TestSequence {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+
+    @Id  // Identificativo del documento
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "job_id", nullable = false)
+    @DBRef  // Riferimento al documento Job
     private Job job;
 
-    @Column(name = "generated_at")
     private Timestamp generatedAt;
-
-
-    @Column(name = "name")
     private String name;
-
-
-    @Column(name = "read_only_parameter")
     private String readOnlyParameter;
-
-
-    @Column(name = "generator")
     private String generator;
 
-    @OneToMany(mappedBy = "sequence")
+    @DBRef  // Riferimento alle interazioni di test
     private Set<TestInteraction> testInteractions = new LinkedHashSet<>();
+
+    @DBRef  // Riferimento ai risultati dei test
+    private Set<TestResult> testResults = new LinkedHashSet<>();
+
+    // Costruttori, getter, e setter
 
     public Long getId() {
         return id;
@@ -102,9 +94,6 @@ public class TestSequence {
     public void setTestResults(Set<TestResult> testResults) {
         this.testResults = testResults;
     }
-
-    @OneToMany(mappedBy = "sequence")
-    private Set<TestResult> testResults = new LinkedHashSet<>();
 
     @Override
     public String toString() {

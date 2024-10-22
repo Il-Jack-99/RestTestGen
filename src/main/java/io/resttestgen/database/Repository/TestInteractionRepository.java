@@ -1,34 +1,49 @@
 package io.resttestgen.database.Repository;
 
+
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import io.resttestgen.database.Model.TestInteraction;
-import io.resttestgen.database.Model.TestSequence;
+import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
+@Repository
 public class TestInteractionRepository {
-    private EntityManager entityManager;
-    private EntityManagerFactory emf;
 
-    public TestInteractionRepository() {
-        this.emf = Persistence.createEntityManagerFactory("rtg_pu");
-        this.entityManager = this.emf.createEntityManager();
+    @Autowired
+    private MongoDatabase mongoDatabase;  // MongoDatabase iniettato tramite Spring
+
+    private static final String COLLECTION_NAME = "testInteractions";
+
+    // Salva una TestInteraction nel database MongoDB
+    public void add(TestInteraction testInteraction) {
+        MongoCollection<Document> collection = mongoDatabase.getCollection(COLLECTION_NAME);
+
+        Document testInteractionDoc = new Document("id", testInteraction.getId())
+                .append("requestBody", testInteraction.getRequestBody())
+                .append("responseProtocol", testInteraction.getResponseProtocol())
+                .append("sequenceId", testInteraction.getSequence().getId());
+
+        collection.insertOne(testInteractionDoc);
     }
 
-    public TestInteraction add(TestInteraction testInteraction) {
-        entityManager.getTransaction().begin();
-        entityManager.persist(testInteraction);
-        entityManager.getTransaction().commit();
-        return testInteraction;
+    // Trova una TestInteraction per ID
+    public TestInteraction findById(Long id) {
+        MongoCollection<Document> collection = mongoDatabase.getCollection(COLLECTION_NAME);
+        Document query = new Document("id", id);
+        Document testInteractionDoc = collection.find(query).first();
+
+        if (testInteractionDoc != null) {
+            TestInteraction testInteraction = new TestInteraction();
+            testInteraction.setId(testInteractionDoc.getLong("id"));
+            testInteraction.setRequestBody(testInteractionDoc.getString("requestBody"));
+            testInteraction.setResponseProtocol(testInteractionDoc.getString("responseProtocol"));
+            // Puoi aggiungere il mapping per TestSequence qui, se necessario
+            return testInteraction;
+        }
+        return null;
     }
 
-    public TestInteraction findById(Long id){
-        return entityManager.find(TestInteraction.class, id);
-    }
-
-    public void close(){
-        this.entityManager.close();
-        this.emf.close();
-    }
+    // Altri metodi CRUD, se necessari
 }

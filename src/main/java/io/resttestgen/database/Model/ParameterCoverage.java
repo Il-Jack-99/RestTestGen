@@ -1,45 +1,39 @@
 package io.resttestgen.database.Model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.Setter;
 
-import javax.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
-
-@Entity
-@Table(name = "parameter_coverage")
+@Document(collection = "parameter_coverage")  // Indica che questa classe è un documento MongoDB
 public class ParameterCoverage {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+
+    @Id  // Identificativo del documento
     private Long id;
 
-
-    @Column(name = "category")
-    private String category;
-
-
-    @Column(name = "endpoint")
-    private String endpoint;
-
-
-    @Column(name = "method")
-    private String method;
-
-
-    @Column(name = "parameter")
-    private String parameter;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "job_id", nullable = false)
-    @JsonIgnore
+    @DBRef  // Riferimento al documento Job
     private Job job;
 
-    public ParameterCoverage(){
+    private String category;  // Categoria della copertura (es. documented, notTested)
+    private String method;  // Metodo HTTP (GET, POST, PUT, ecc.)
+    private String endpoint;  // Endpoint relativo all'operazione
+    private String parameter;  // Nome del parametro
 
+    // Costruttore vuoto
+    public ParameterCoverage() {
     }
 
+    // Costruttore completo
+    public ParameterCoverage(Long id, Job job, String category, String method, String endpoint, String parameter) {
+        this.id = id;
+        this.job = job;
+        this.category = category;
+        this.method = method;
+        this.endpoint = endpoint;
+        this.parameter = parameter;
+    }
+
+    // Getter e Setter per ID
     public Long getId() {
         return id;
     }
@@ -48,38 +42,7 @@ public class ParameterCoverage {
         this.id = id;
     }
 
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getEndpoint() {
-        return endpoint;
-    }
-
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
-    }
-
-    public String getMethod() {
-        return method;
-    }
-
-    public void setMethod(String method) {
-        this.method = method;
-    }
-
-    public String getParameter() {
-        return parameter;
-    }
-
-    public void setParameter(String parameter) {
-        this.parameter = parameter;
-    }
-
+    // Getter e Setter per Job
     public Job getJob() {
         return job;
     }
@@ -88,5 +51,52 @@ public class ParameterCoverage {
         this.job = job;
     }
 
+    // Getter e Setter per Category
+    public String getCategory() {
+        return category;
+    }
 
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    // Getter e Setter per Method
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
+    // Getter e Setter per Endpoint
+    public String getEndpoint() {
+        return endpoint;
+    }
+
+    public void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
+    }
+
+    // Getter e Setter per Parameter
+    public String getParameter() {
+        return parameter;
+    }
+
+    public void setParameter(String parameter) {
+        this.parameter = parameter;
+    }
+
+    // Metodo toString per la rappresentazione dell'oggetto
+    @Override
+    public String toString() {
+        return "ParameterCoverage{" +
+                "id=" + id +
+                ", job=" + job +
+                ", category='" + category + '\'' +
+                ", method='" + method + '\'' +
+                ", endpoint='" + endpoint + '\'' +
+                ", parameter='" + parameter + '\'' +
+                '}';
+    }
 }

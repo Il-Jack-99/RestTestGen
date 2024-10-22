@@ -1,118 +1,77 @@
 package io.resttestgen.database.Writer;
 
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import io.resttestgen.core.testing.Oracle;
 import io.resttestgen.core.testing.TestResult;
-import io.resttestgen.database.Model.Job;
-import io.resttestgen.database.Model.TestInteraction;
-import io.resttestgen.database.Model.TestSequence;
-import io.resttestgen.database.Repository.JobRepository;
-import io.resttestgen.database.Repository.TestInteractionRepository;
-import io.resttestgen.database.Repository.TestResultRepository;
-import io.resttestgen.database.Repository.TestSequenceRepository;
+import io.resttestgen.core.testing.TestSequence;
+import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+@Repository
 public class ReportWriterDb {
 
-    private Job job;
+    @Autowired
+    private MongoDatabase mongoDatabase;  // Usa il database MongoDB
 
-    private TestSequenceRepository testSequenceRepository;
-    private TestInteractionRepository testInteractionRepository;
-
-    private TestResultRepository testResultRepository;
-
-    public void closeAllRepository(){
-        testSequenceRepository.close();
-        testInteractionRepository.close();
-        testResultRepository.close();
+    public void closeAllRepository() {
+        // MongoDB non richiede la chiusura manuale della connessione
     }
 
-    public ReportWriterDb(){
-        JobRepository jobRepository = new JobRepository();
-        this.job = jobRepository.findFromFileById();
-        jobRepository.close();
+    public void write(TestSequence testSequence) {
+        // Ottieni la collection "testResults" dove salverai tutti i dati
+        MongoCollection<Document> testResultsCollection = mongoDatabase.getCollection("testResults");
 
-        this.testSequenceRepository = new TestSequenceRepository();
-        this.testInteractionRepository = new TestInteractionRepository();
-        this.testResultRepository = new TestResultRepository();
-    }
+        // Crea un documento per il TestSequence con tutte le interazioni e risultati
+        Document testSequenceDoc = new Document("name", testSequence.getName())
+                .append("generator", testSequence.getGenerator())
+                .append("generatedAt", testSequence.getGeneratedAt());
 
-    public void write(io.resttestgen.core.testing.TestSequence testSequence){
+        // Lista di documenti per le interazioni di test
+        List<Document> testInteractionsDocs = new ArrayList<>();
+        for (io.resttestgen.core.testing.TestInteraction ti : testSequence.getTestInteractions()) {
+            Document tiDoc = new Document("requestMethod", ti.getRequestMethod().toString())
+                    .append("requestUrl", ti.getRequestURL())
+                    .append("requestHeaders", ti.getRequestHeaders())
+                    .append("requestBody", ti.getRequestBody())
+                    .append("requestSentAt", ti.getRequestSentAt())
+                    .append("responseProtocol", ti.getResponseProtocol())
+                    .append("responseStatusCode", ti.getResponseStatusCode().toString())
+                    .append("responseHeaders", ti.getResponseHeaders())
+                    .append("responseBody", ti.getResponseBody())
+                    .append("responseReceivedAt", ti.getResponseReceivedAt())
+                    .append("executionTime", ti.getExecutionTime())
+                    .append("testStatus", ti.getTestStatus().toString());
 
-
-        //TestSequenceRepository testSequenceRepository = new TestSequenceRepository();
-        //TestInteractionRepository testInteractionRepository = new TestInteractionRepository();
-
-        TestSequence ts = new TestSequence();
-
-        //Init TestSequence
-        ts.setJob(job);
-        ts.setName(testSequence.getName().substring(0,testSequence.getName().indexOf('-')));
-        ts.setGenerator(testSequence.getGenerator());
-        ts.setGeneratedAt(testSequence.getGeneratedAt());
-
-        List<io.resttestgen.core.testing.TestInteraction> testInteractionsList = testSequence.getTestInteractions();
-        Set<TestInteraction> testInteractions = new HashSet<>();
-
-
-       TestSequence createdTestSequence = testSequenceRepository.add(ts);
-
-
-
-        for(io.resttestgen.core.testing.TestInteraction ti : testInteractionsList){
-            TestInteraction testInteraction = new TestInteraction();
-
-            testInteraction.setRequestMethod(ti.getRequestMethod().toString());
-            testInteraction.setRequestUrl(ti.getRequestURL());
-            testInteraction.setRequestHeader(ti.getRequestHeaders());
-            testInteraction.setRequestBody(ti.getRequestBody());
-            testInteraction.setRequestSentAt(ti.getRequestSentAt());
-            testInteraction.setResponseProtocol(ti.getResponseProtocol());
-            testInteraction.setResponseStatusCode(ti.getResponseStatusCode().toString());
-            testInteraction.setResponseHeaders(ti.getResponseHeaders());
-            testInteraction.setResponseBody(ti.getResponseBody());
-            testInteraction.setResponseReceivedAt(ti.getResponseReceivedAt());
-            testInteraction.setExecutionTime(ti.getExecutionTime());
-            testInteraction.setTestStatus(ti.getTestStatus().toString());
-            testInteraction.setSequence(createdTestSequence);
-
-            testInteractionRepository.add(testInteraction);
-
-            testInteractions.add(testInteraction);
+            testInteractionsDocs.add(tiDoc);
         }
 
+        // Aggiungi le interazioni al documento principale
+        testSequenceDoc.append("testInteractions", testInteractionsDocs);
 
-        Map<Oracle, io.resttestgen.core.testing.TestResult> resultsMap = testSequence.getTestResults();
-
-        for (Map.Entry<Oracle, io.resttestgen.core.testing.TestResult> entry : resultsMap.entrySet()) {
+        // Salva i risultati dei test per ogni Oracle
+        Map<String, Document> testResultsDocs = new HashMap<>();
+        for (Map.Entry<Oracle, TestResult> entry : testSequence.getTestResults().entrySet()) {
             Oracle oracle = entry.getKey();
-            io.resttestgen.core.testing.TestResult testResult = entry.getValue();
+            TestResult testResult = entry.getValue();
 
-            io.resttestgen.database.Model.TestResult tr = new io.resttestgen.database.Model.TestResult();
-            tr.setOracle(oracle.toString());
-            tr.setResult(testResult.getResult());
-            tr.setMessage(testResult.getMessage());
+            Document trDoc = new Document("result", testResult.getResult())
+                    .append("message", testResult.getMessage());
 
-            tr.setSequence(ts);
-            testResultRepository.add(tr);
+            testResultsDocs.put(oracle.toString(), trDoc);
         }
 
+        // Aggiungi i risultati al documento principale
+        testSequenceDoc.append("testResults", testResultsDocs);
 
-
-
-
-
-
-
-
-
-
+        // Inserisci il documento nella collection "testResults"
+        testResultsCollection.insertOne(testSequenceDoc);
     }
-
-
 }
+

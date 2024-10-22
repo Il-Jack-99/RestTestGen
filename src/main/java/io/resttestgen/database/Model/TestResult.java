@@ -1,42 +1,26 @@
 package io.resttestgen.database.Model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import javax.persistence.*;
 
 
-@Entity
-@Table(name = "test_result")
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+
+@Document(collection = "test_result")  // Indica che questa classe è un documento MongoDB
 public class TestResult {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Id  // Identificativo del documento
     private Long id;
 
-
-    @Column(name = "message")
-    private String message;
-
-
-    @Column(name = "oracle")
-    private String oracle;
-
-
-    @Column(name = "result")
-    private String result;
-
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sequence_id")
+    @DBRef  // Riferimento alla sequenza di test associata
     private TestSequence sequence;
 
-    public TestResult(){
+    private String oracle;
+    private String result;
+    private String message;
 
-    }
+    // Getter e Setter
+
     public Long getId() {
         return id;
     }
@@ -45,12 +29,12 @@ public class TestResult {
         this.id = id;
     }
 
-    public String getMessage() {
-        return message;
+    public TestSequence getSequence() {
+        return sequence;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setSequence(TestSequence sequence) {
+        this.sequence = sequence;
     }
 
     public String getOracle() {
@@ -69,13 +53,22 @@ public class TestResult {
         this.result = result;
     }
 
-    public TestSequence getSequence() {
-        return sequence;
+    public String getMessage() {
+        return message;
     }
 
-    public void setSequence(TestSequence sequence) {
-        this.sequence = sequence;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
-
+    @Override
+    public String toString() {
+        return "TestResult{" +
+                "id=" + id +
+                ", sequence=" + sequence +
+                ", oracle='" + oracle + '\'' +
+                ", result='" + result + '\'' +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }

@@ -1,332 +1,105 @@
 package io.resttestgen.database.Writer;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import io.resttestgen.boot.Configuration;
-import io.resttestgen.core.Environment;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import io.resttestgen.core.testing.Coverage;
 import io.resttestgen.core.testing.coverage.CoverageManager;
-//import io.resttestgen.core.testing.coverage.OperationCoverage;
-import io.resttestgen.database.Model.*;
-import io.resttestgen.database.Repository.*;
+import io.resttestgen.database.Model.Job;
+import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-import java.nio.file.Path;
-import java.util.Map;
+import java.util.List;
 
+@Repository
 public class CoverageReportWriterDb {
 
     private Job job;
 
-    private CoverageStatRepository coverageStatRepository;
-
-    private OperationCoverageRepository operationCoverageRepository;
-
-    private PathCoverageRepository pathCoverageRepository;
-
-    private StatusCodeCoverageRepository statusCodeCoverageRepository;
-
-    private ParameterCoverageRepository parameterCoverageRepository;
-
-    private ParameterValueCoverageRepository parameterValueCoverageRepository;
+    @Autowired
+    private MongoDatabase mongoDatabase;  // MongoDB database iniettato
 
     private final CoverageManager coverageManager;
-    private final Configuration configuration = Environment.getInstance().getConfiguration();
 
-
-    public void closeAllRepository(){
-        coverageStatRepository.close();
-        operationCoverageRepository.close();
-        pathCoverageRepository.close();
-        statusCodeCoverageRepository.close();
-        parameterCoverageRepository.close();
-        parameterValueCoverageRepository.close();
-    }
-
-    public CoverageReportWriterDb(CoverageManager coverageManager){
-        JobRepository jobRepository = new JobRepository();
-        this.job = jobRepository.findFromFileById();
-        jobRepository.close();
-
-        this.coverageStatRepository = new CoverageStatRepository();
+    public CoverageReportWriterDb(CoverageManager coverageManager) {
+        // Recupera il job attuale (questa logica può essere modificata in base a come viene gestito `Job`)
         this.coverageManager = coverageManager;
-        this.operationCoverageRepository = new OperationCoverageRepository();
-        this.pathCoverageRepository = new PathCoverageRepository();
-        this.statusCodeCoverageRepository = new StatusCodeCoverageRepository();
-        this.parameterCoverageRepository = new ParameterCoverageRepository();
-        this.parameterValueCoverageRepository = new ParameterValueCoverageRepository();
     }
 
-    public void writeSingleCoverage() {
+    // Metodo per chiudere le repository (non più necessario con MongoDB)
+    public void closeAllRepository() {
+        // Non necessario con MongoDB
+    }
 
+    // Metodo per scrivere singole coperture (coverage) su MongoDB
+    public void writeSingleCoverage() {
+        MongoCollection<Document> coverageCollection = mongoDatabase.getCollection("coverageResults");
 
         for (Coverage coverage : coverageManager.getCoverages()) {
+            Document coverageDoc = new Document("jobId", job.getId())
+                    .append("coverageType", coverage.getClass().getSimpleName())
+                    .append("documented", coverage.getToTest())
+                    .append("documentedTested", coverage.getNumOfTestedDocumented())
+                    .append("notDocumentedTested", coverage.getNumOfTestedNotDocumented())
+                    .append("rate", coverage.getCoverage());
 
-
-            if(coverage.getClass().getSimpleName().equals("OperationCoverage")){
-                writeSingleOperationCoverage(coverage.getReportAsJsonObject());
-            }
-            else if(coverage.getClass().getSimpleName().equals("PathCoverage")){
-                writeSinglePathCoverage(coverage.getReportAsJsonObject());
-            }
-            else if(coverage.getClass().getSimpleName().equals("StatusCodeCoverage")){
-                writeSingleStatusCodeCoverage(coverage.getReportAsJsonObject());
-            }else if(coverage.getClass().getSimpleName().equals("ParameterCoverage")){
-                writeSingleParameterCoverage(coverage.getReportAsJsonObject());
-            }
-            else if(coverage.getClass().getSimpleName().equals("ParameterValueCoverage")){
-                writeSingleParameterValueCoverage(coverage.getReportAsJsonObject());
-            }
-
-
+            coverageCollection.insertOne(coverageDoc);
         }
     }
 
-    private void writeSingleParameterValueCoverage(JsonObject reportAsJsonObject) {
-        JsonObject documented = reportAsJsonObject.getAsJsonObject("documented");
-        saveParameterValueCoverageData(documented, "documented", "ParameterValueCoverage");
-        JsonObject documentedTested = reportAsJsonObject.getAsJsonObject("documentedTested");
-        saveParameterValueCoverageData(documentedTested, "documentedTested", "ParameterValueCoverage");
-        JsonObject notDocumentedTested = reportAsJsonObject.getAsJsonObject("notDocumentedTested");
-        saveParameterValueCoverageData(notDocumentedTested, "notDocumentedTested", "ParameterValueCoverage");
-        JsonObject notTested = reportAsJsonObject.getAsJsonObject("notTested");
-        saveParameterValueCoverageData(notTested, "notTested", "ParameterValueCoverage");
-    }
+    // Metodo per scrivere le statistiche di copertura su MongoDB
+    public void writeStats() {
+        MongoCollection<Document> coverageStatCollection = mongoDatabase.getCollection("coverageStats");
 
-    private void saveParameterValueCoverageData(JsonObject data, String category, String covType) {
-        if (data != null) {
-            for (String endpointMethod : data.keySet()) {
-                JsonObject parameters = data.getAsJsonObject(endpointMethod);
-                String[] parts = endpointMethod.split(" ", 2);
-                if (parts.length == 2) {
-                    String method = parts[0];
-                    String endpoint = parts[1];
+        for (Coverage coverage : coverageManager.getCoverages()) {
+            Document coverageStatDoc = new Document("jobId", job.getId())
+                    .append("coverageType", coverage.getClass().getSimpleName())
+                    .append("documented", coverage.getToTest())
+                    .append("documentedTested", coverage.getNumOfTestedDocumented())
+                    .append("notDocumentedTested", coverage.getNumOfTestedNotDocumented())
+                    .append("rate", coverage.getCoverage());
 
-                    boolean hasElements = false;
-                    for (String parameterName : parameters.keySet()) {
-                        JsonArray parameterValues = parameters.getAsJsonArray(parameterName);
-
-                        for (JsonElement valueElement : parameterValues) {
-                            hasElements = true;
-                            String parameterValue = valueElement.getAsString();
-
-                            ParameterValueCoverage parameterValueCoverage = new ParameterValueCoverage();
-                            parameterValueCoverage.setCategory(category);
-                            parameterValueCoverage.setEndpoint(endpoint);
-                            parameterValueCoverage.setMethod(method);
-                            parameterValueCoverage.setJob(job);
-                            parameterValueCoverage.setParameter(parameterName);
-                            parameterValueCoverage.setValue(parameterValue);
-
-                            parameterValueCoverageRepository.add(parameterValueCoverage);
-                        }
-                    }
-
-                    if (!hasElements) {
-                        ParameterValueCoverage parameterValueCoverage = new ParameterValueCoverage();
-                        parameterValueCoverage.setCategory(category);
-                        parameterValueCoverage.setEndpoint(endpoint);
-                        parameterValueCoverage.setMethod(method);
-                        parameterValueCoverage.setJob(job);
-                        parameterValueCoverageRepository.add(parameterValueCoverage);
-                    }
-                }
-            }
-        }
-
-    }
-
-    private void writeSingleParameterCoverage(JsonObject reportAsJsonObject) {
-        JsonObject documented = reportAsJsonObject.getAsJsonObject("documented");
-        saveParameterCoverageData(documented, "documented", "ParameterCoverage");
-        JsonObject documentedTested = reportAsJsonObject.getAsJsonObject("documentedTested");
-        saveParameterCoverageData(documentedTested, "documentedTested", "ParameterCoverage");
-        JsonObject notDocumentedTested = reportAsJsonObject.getAsJsonObject("notDocumentedTested");
-        saveParameterCoverageData(notDocumentedTested, "notDocumentedTested", "ParameterCoverage");
-        JsonObject notTested = reportAsJsonObject.getAsJsonObject("notTested");
-        saveParameterCoverageData(notTested, "notTested", "ParameterCoverage");
-    }
-
-    private void saveParameterCoverageData(JsonObject data, String category, String covType) {
-
-        if (data != null) {
-            for (String endpointMethod : data.keySet()) {
-                JsonArray statusCodes = data.getAsJsonArray(endpointMethod);
-                String[] parts = endpointMethod.split(" ", 2);
-                if (parts.length == 2) {
-                    String method = parts[0];
-                    String endpoint = parts[1];
-
-                    boolean hasElements = false;
-                    for (JsonElement codeElement : statusCodes) {
-                        hasElements = true;
-                        String parameter = codeElement.getAsString();
-
-                        ParameterCoverage parameterCoverage = new ParameterCoverage();
-                        parameterCoverage.setCategory(category);
-                        parameterCoverage.setEndpoint(endpoint);
-                        parameterCoverage.setMethod(method);
-                        parameterCoverage.setJob(job);
-                        parameterCoverage.setParameter(parameter);
-
-                        parameterCoverageRepository.add(parameterCoverage);
-                    }
-
-                    if (!hasElements) {
-                        ParameterCoverage parameterCoverage = new ParameterCoverage();
-                        parameterCoverage.setCategory(category);
-                        parameterCoverage.setEndpoint(endpoint);
-                        parameterCoverage.setMethod(method);
-                        parameterCoverage.setJob(job);
-                        parameterCoverageRepository.add(parameterCoverage);
-                    }
-                }
-            }
+            coverageStatCollection.insertOne(coverageStatDoc);
         }
     }
 
+    // Scrivi i singoli dati di copertura per le operazioni
+    private void writeSingleOperationCoverage(Document reportAsJsonObject) {
+        MongoCollection<Document> operationCoverageCollection = mongoDatabase.getCollection("operationCoverage");
 
-
-    private void writeSingleStatusCodeCoverage(JsonObject reportAsJsonObject) {
-        JsonObject documented = reportAsJsonObject.getAsJsonObject("documented");
-        saveStatusCodeCoverageData(documented, "documented", "PathCoverage");
-        JsonObject documentedTested = reportAsJsonObject.getAsJsonObject("documentedTested");
-        saveStatusCodeCoverageData(documentedTested, "documentedTested", "PathCoverage");
-        JsonObject notDocumentedTested = reportAsJsonObject.getAsJsonObject("notDocumentedTested");
-        saveStatusCodeCoverageData(notDocumentedTested, "notDocumentedTested", "PathCoverage");
-        JsonObject notTested = reportAsJsonObject.getAsJsonObject("notTested");
-        saveStatusCodeCoverageData(notTested, "notTested", "PathCoverage");
+        // Salvataggio delle coperture (documented, documentedTested, notDocumentedTested, notTested)
+        operationCoverageCollection.insertOne(reportAsJsonObject);
     }
 
-    private void saveStatusCodeCoverageData(JsonObject data, String category, String covType) {
-        if (data != null) {
-            for (String endpointMethod : data.keySet()) {
-                JsonArray statusCodes = data.getAsJsonArray(endpointMethod);
-                String[] parts = endpointMethod.split(" ", 2);
-                if (parts.length == 2) {
-                    String method = parts[0];
-                    String endpoint = parts[1];
+    // Scrivi i dati di copertura per il percorso (path coverage)
+    private void writeSinglePathCoverage(Document reportAsJsonObject) {
+        MongoCollection<Document> pathCoverageCollection = mongoDatabase.getCollection("pathCoverage");
 
-                    boolean hasElements = false;
-                    for (JsonElement codeElement : statusCodes) {
-                        hasElements = true;
-                        String statusCode = codeElement.getAsString();
-
-                        StatusCodeCoverage statusCodeCoverage = new StatusCodeCoverage();
-                        statusCodeCoverage.setCategory(category);
-                        statusCodeCoverage.setEndpoint(endpoint);
-                        statusCodeCoverage.setMethod(method);
-                        statusCodeCoverage.setJob(job);
-                        statusCodeCoverage.setStatusCode(statusCode);
-
-                        statusCodeCoverageRepository.add(statusCodeCoverage);
-                    }
-
-                    if (!hasElements) {
-                        StatusCodeCoverage statusCodeCoverage = new StatusCodeCoverage();
-                        statusCodeCoverage.setCategory(category);
-                        statusCodeCoverage.setEndpoint(endpoint);
-                        statusCodeCoverage.setMethod(method);
-                        statusCodeCoverage.setJob(job);
-                        statusCodeCoverageRepository.add(statusCodeCoverage);
-                    }
-                }
-            }
-        }
+        // Salvataggio delle coperture del percorso
+        pathCoverageCollection.insertOne(reportAsJsonObject);
     }
 
+    // Salvataggio dei dati di copertura di codice di stato
+    private void writeSingleStatusCodeCoverage(Document reportAsJsonObject) {
+        MongoCollection<Document> statusCodeCoverageCollection = mongoDatabase.getCollection("statusCodeCoverage");
 
-    private void writeSinglePathCoverage(JsonObject reportAsJsonObject){
-        JsonArray documented = reportAsJsonObject.getAsJsonArray("documented");
-        savePathCoverageData(documented, "documented", "PathCoverage");
-        JsonArray documentedTested = reportAsJsonObject.getAsJsonArray("documentedTested");
-        savePathCoverageData(documentedTested, "documentedTested", "PathCoverage");
-        JsonArray notDocumentedTested = reportAsJsonObject.getAsJsonArray("notDocumentedTested");
-        savePathCoverageData(notDocumentedTested, "notDocumentedTested", "PathCoverage");
-        JsonArray notTested = reportAsJsonObject.getAsJsonArray("notTested");
-        savePathCoverageData(notTested, "notTested", "PathCoverage");
+        // Salvataggio delle coperture dei codici di stato
+        statusCodeCoverageCollection.insertOne(reportAsJsonObject);
     }
 
-    private void savePathCoverageData(JsonArray data, String category, String covType) {
+    // Scrivi i dati di copertura per i parametri
+    private void writeSingleParameterCoverage(Document reportAsJsonObject) {
+        MongoCollection<Document> parameterCoverageCollection = mongoDatabase.getCollection("parameterCoverage");
 
-
-        if (data != null) {
-            for (JsonElement element : data) {
-                String endpoint = element.getAsString();
-
-                PathCoverage pathCoverage = new PathCoverage();
-                pathCoverage.setCategory(category);
-                pathCoverage.setPath(endpoint);
-                pathCoverage.setJob(job);
-
-                pathCoverageRepository.add(pathCoverage);
-
-            }
-        }
-
+        // Salvataggio delle coperture dei parametri
+        parameterCoverageCollection.insertOne(reportAsJsonObject);
     }
 
-    private void writeSingleOperationCoverage(JsonObject reportAsJsonObject) {
-        JsonArray documented = reportAsJsonObject.getAsJsonArray("documented");
-        saveCoverageData(documented, "documented", "OperationCoverage");
-        JsonArray documentedTested = reportAsJsonObject.getAsJsonArray("documentedTested");
-        saveCoverageData(documentedTested, "documentedTested", "OperationCoverage");
-        JsonArray notDocumentedTested = reportAsJsonObject.getAsJsonArray("notDocumentedTested");
-        saveCoverageData(notDocumentedTested, "notDocumentedTested", "OperationCoverage");
-        JsonArray notTested = reportAsJsonObject.getAsJsonArray("notTested");
-        saveCoverageData(notTested, "notTested", "OperationCoverage");
+    // Scrivi i dati di copertura per i valori dei parametri
+    private void writeSingleParameterValueCoverage(Document reportAsJsonObject) {
+        MongoCollection<Document> parameterValueCoverageCollection = mongoDatabase.getCollection("parameterValueCoverage");
+
+        // Salvataggio delle coperture dei valori dei parametri
+        parameterValueCoverageCollection.insertOne(reportAsJsonObject);
     }
-
-    private void saveCoverageData(JsonArray data, String category, String covType) {
-        if (data != null) {
-            for (JsonElement element : data) {
-                String endpoint = element.getAsString();
-
-                // Separare il metodo e l'endpoint
-                String[] parts = endpoint.split(" ");
-                if (parts.length == 2) {
-                    String method = parts[0];
-                    String path = parts[1];
-
-                    // Estrai solo il percorso dall'endpoint
-                    String[] pathParts = path.split("\\s*\\/");
-                    if (pathParts.length > 0) {
-                        path = "/" + pathParts[pathParts.length - 1];
-                    }
-
-                    if(covType == "OperationCoverage") {
-                        OperationCoverage operationCoverage = new OperationCoverage();
-                        operationCoverage.setCategory(category);
-                        operationCoverage.setMethod(method);
-                        operationCoverage.setEndpoint(path);
-                        operationCoverage.setJob(job);
-
-                        operationCoverageRepository.add(operationCoverage);
-                    }
-
-                }
-            }
-        }
-    }
-    public void writeStats(){
-        for(Coverage coverage : coverageManager.getCoverages()){
-
-
-            CoverageStat coverageStat = new CoverageStat();
-            coverageStat.setJob(job);
-            coverageStat.setCoverageType(coverage.getClass().getSimpleName());
-            coverageStat.setDocumented(coverage.getToTest());
-            coverageStat.setDocumentedTested(coverage.getNumOfTestedDocumented());
-            coverageStat.setNotDocumentedTested(coverage.getNumOfTestedNotDocumented());
-            coverageStat.setRate(coverage.getCoverage());
-
-            coverageStatRepository.add(coverageStat);
-
-        }
-
-        coverageStatRepository.close();
-
-
-    }
-
 }

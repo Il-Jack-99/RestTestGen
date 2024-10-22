@@ -1,44 +1,40 @@
 package io.resttestgen.database.Model;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
-import javax.persistence.*;
-
-
-@Entity
-@Table(name = "coverage_stats")
+@Document(collection = "coverage_stat")  // Indica che questa classe è un documento MongoDB
 public class CoverageStat {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+
+    @Id  // Identificativo del documento
     private Long id;
 
-
-    @Column(name = "coverage_type")
-    private String coverageType;
-
-    @Column(name = "documented")
-    private Integer documented;
-
-    @Column(name = "documented_tested")
-    private Integer documentedTested;
-
-    @Column(name = "not_documented_tested")
-    private Integer notDocumentedTested;
-
-
-    @Column(name = "rate")
-    private Float rate;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "job_id", nullable = false)
+    @DBRef  // Riferimento al documento Job
     private Job job;
 
-    public CoverageStat(){
+    private String coverageType;  // Tipo di copertura
+    private int documented;  // Numero di elementi documentati
+    private int documentedTested;  // Numero di elementi documentati e testati
+    private int notDocumentedTested;  // Numero di elementi non documentati e testati
+    private double rate;  // Percentuale di copertura
 
+    // Costruttore vuoto
+    public CoverageStat() {
     }
 
+    // Costruttore completo
+    public CoverageStat(Long id, Job job, String coverageType, int documented, int documentedTested, int notDocumentedTested, double rate) {
+        this.id = id;
+        this.job = job;
+        this.coverageType = coverageType;
+        this.documented = documented;
+        this.documentedTested = documentedTested;
+        this.notDocumentedTested = notDocumentedTested;
+        this.rate = rate;
+    }
+
+    // Getter e Setter per ID
     public Long getId() {
         return id;
     }
@@ -47,46 +43,7 @@ public class CoverageStat {
         this.id = id;
     }
 
-    public String getCoverageType() {
-        return coverageType;
-    }
-
-    public void setCoverageType(String coverageType) {
-        this.coverageType = coverageType;
-    }
-
-    public Integer getDocumented() {
-        return documented;
-    }
-
-    public void setDocumented(Integer documented) {
-        this.documented = documented;
-    }
-
-    public Integer getDocumentedTested() {
-        return documentedTested;
-    }
-
-    public void setDocumentedTested(Integer documentedTested) {
-        this.documentedTested = documentedTested;
-    }
-
-    public Integer getNotDocumentedTested() {
-        return notDocumentedTested;
-    }
-
-    public void setNotDocumentedTested(Integer notDocumentedTested) {
-        this.notDocumentedTested = notDocumentedTested;
-    }
-
-    public Float getRate() {
-        return rate;
-    }
-
-    public void setRate(Float rate) {
-        this.rate = rate;
-    }
-
+    // Getter e Setter per Job
     public Job getJob() {
         return job;
     }
@@ -95,4 +52,62 @@ public class CoverageStat {
         this.job = job;
     }
 
+    // Getter e Setter per CoverageType
+    public String getCoverageType() {
+        return coverageType;
+    }
+
+    public void setCoverageType(String coverageType) {
+        this.coverageType = coverageType;
+    }
+
+    // Getter e Setter per Documented
+    public int getDocumented() {
+        return documented;
+    }
+
+    public void setDocumented(int documented) {
+        this.documented = documented;
+    }
+
+    // Getter e Setter per DocumentedTested
+    public int getDocumentedTested() {
+        return documentedTested;
+    }
+
+    public void setDocumentedTested(int documentedTested) {
+        this.documentedTested = documentedTested;
+    }
+
+    // Getter e Setter per NotDocumentedTested
+    public int getNotDocumentedTested() {
+        return notDocumentedTested;
+    }
+
+    public void setNotDocumentedTested(int notDocumentedTested) {
+        this.notDocumentedTested = notDocumentedTested;
+    }
+
+    // Getter e Setter per Rate
+    public double getRate() {
+        return rate;
+    }
+
+    public void setRate(double rate) {
+        this.rate = rate;
+    }
+
+    // Metodo toString per la rappresentazione della classe
+    @Override
+    public String toString() {
+        return "CoverageStat{" +
+                "id=" + id +
+                ", job=" + job +
+                ", coverageType='" + coverageType + '\'' +
+                ", documented=" + documented +
+                ", documentedTested=" + documentedTested +
+                ", notDocumentedTested=" + notDocumentedTested +
+                ", rate=" + rate +
+                '}';
+    }
 }

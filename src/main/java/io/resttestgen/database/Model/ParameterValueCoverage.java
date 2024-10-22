@@ -1,52 +1,36 @@
 package io.resttestgen.database.Model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
-import javax.persistence.*;
-
-
-@Entity
-@Table(name = "parameter_value_coverage")
+@Document(collection = "parameter_value_coverage")
 public class ParameterValueCoverage {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Long id;
 
-
-    @Column(name = "category")
-    private String category;
-
-
-    @Column(name = "endpoint")
-    private String endpoint;
-
-
-    @Column(name = "location")
-    private String location;
-
-
-    @Column(name = "method")
-    private String method;
-
-
-    @Column(name = "parameter")
-    private String parameter;
-
-
-    @Column(name = "value")
-    private String value;
-
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "job_id", nullable = false)
-    @JsonIgnore
+    @DBRef
     private Job job;
 
-    public ParameterValueCoverage(){
+    private String category;
+    private String method;
+    private String endpoint;
+    private String parameter;
+    private String value;
 
+    // Costruttori, getter e setter
+    public ParameterValueCoverage() {
+    }
+
+    public ParameterValueCoverage(Long id, Job job, String category, String method, String endpoint, String parameter, String value) {
+        this.id = id;
+        this.job = job;
+        this.category = category;
+        this.method = method;
+        this.endpoint = endpoint;
+        this.parameter = parameter;
+        this.value = value;
     }
 
     public Long getId() {
@@ -57,6 +41,14 @@ public class ParameterValueCoverage {
         this.id = id;
     }
 
+    public Job getJob() {
+        return job;
+    }
+
+    public void setJob(Job job) {
+        this.job = job;
+    }
+
     public String getCategory() {
         return category;
     }
@@ -65,28 +57,20 @@ public class ParameterValueCoverage {
         this.category = category;
     }
 
-    public String getEndpoint() {
-        return endpoint;
-    }
-
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
     public String getMethod() {
         return method;
     }
 
     public void setMethod(String method) {
         this.method = method;
+    }
+
+    public String getEndpoint() {
+        return endpoint;
+    }
+
+    public void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
     }
 
     public String getParameter() {
@@ -104,14 +88,4 @@ public class ParameterValueCoverage {
     public void setValue(String value) {
         this.value = value;
     }
-
-    public Job getJob() {
-        return job;
-    }
-
-    public void setJob(Job job) {
-        this.job = job;
-    }
-
-
 }

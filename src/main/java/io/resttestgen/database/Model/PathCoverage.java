@@ -1,38 +1,32 @@
 package io.resttestgen.database.Model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.Setter;
-
-import javax.persistence.*;
-import java.nio.file.Path;
 
 
-@Entity
-@Table(name = "path_coverage")
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+
+@Document(collection = "path_coverage")
 public class PathCoverage {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Long id;
 
-
-    @Column(name = "category")
-    private String category;
-
-
-    @Column(name = "path")
-    private String path;
-
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "job_id", nullable = false)
-    @JsonIgnore
+    @DBRef
     private Job job;
 
+    private String category;
+    private String path;
 
-    public PathCoverage(){
+    // Costruttori, getter e setter
+    public PathCoverage() {
+    }
 
+    public PathCoverage(Long id, Job job, String category, String path) {
+        this.id = id;
+        this.job = job;
+        this.category = category;
+        this.path = path;
     }
 
     public Long getId() {
@@ -41,6 +35,14 @@ public class PathCoverage {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Job getJob() {
+        return job;
+    }
+
+    public void setJob(Job job) {
+        this.job = job;
     }
 
     public String getCategory() {
@@ -58,13 +60,4 @@ public class PathCoverage {
     public void setPath(String path) {
         this.path = path;
     }
-
-    public Job getJob() {
-        return job;
-    }
-
-    public void setJob(Job job) {
-        this.job = job;
-    }
-
 }

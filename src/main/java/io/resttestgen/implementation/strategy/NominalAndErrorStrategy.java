@@ -20,24 +20,20 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.util.List;
 
-
 @SuppressWarnings("unused")
 public class NominalAndErrorStrategy extends Strategy {
 
-    CoverageReportWriterDb coverageReportWriterDb;
-    ReportWriterDb reportWriterDb = new ReportWriterDb();
-    RestAssuredWriterDb restAssuredWriterDb = new RestAssuredWriterDb();
-
+    private CoverageReportWriterDb coverageReportWriterDb;
+    private final ReportWriterDb reportWriterDb = new ReportWriterDb();  // Modificata per MongoDB
+    private final RestAssuredWriterDb restAssuredWriterDb = new RestAssuredWriterDb();  // Modificata per MongoDB
 
     private static final Logger logger = LogManager.getLogger(NominalAndErrorStrategy.class);
 
     private final TestSequence globalNominalTestSequence = new TestSequence();
 
-
-
     public void start() {
 
-        // According to the order provided by the graph, execute the nominal fuzzer
+        // Secondo l'ordine fornito dal grafo, esegui il nominal fuzzer
         OperationsSorter sorter = new GraphBasedOperationsSorter();
         while (!sorter.isEmpty()) {
             Operation operationToTest = sorter.getFirst();
@@ -47,53 +43,45 @@ public class NominalAndErrorStrategy extends Strategy {
 
             for (TestSequence testSequence : nominalSequences) {
 
-                // Run test sequence
+                // Esegui la sequenza di test
                 TestRunner testRunner = TestRunner.getInstance();
                 testRunner.run(testSequence);
-                // Evaluate sequence with oracles
+
+                // Valuta la sequenza con gli oracoli
                 StatusCodeOracle statusCodeOracle = new StatusCodeOracle();
                 statusCodeOracle.assertTestSequence(testSequence);
 
-                // Write report to file
-                //ReportWriter reportWriter = new ReportWriter(testSequence);
-                //reportWriter.write();
+                // Salva il report della sequenza di test su MongoDB
                 reportWriterDb.write(testSequence);
 
-
+                // Scrivi il report RestAssured in MongoDB
                 RestAssuredWriter restAssuredWriter = new RestAssuredWriter(testSequence);
-                //restAssuredWriter.write();
-                restAssuredWriterDb.addToNominalMap(restAssuredWriter.testAssuredFileName(), restAssuredWriter.testAssuredContent() );
-
-
+                restAssuredWriterDb.addToNominalMap(restAssuredWriter.testAssuredFileName(), restAssuredWriter.testAssuredContent());
             }
             globalNominalTestSequence.append(nominalSequences);
             sorter.removeFirst();
         }
 
+        // Salva i test nominali eseguiti in MongoDB
         restAssuredWriterDb.writeNominal();
 
-
-
-
-        // Keep only successful test interactions in the sequence
+        // Mantieni solo le interazioni di test riuscite nella sequenza
         globalNominalTestSequence.filterBySuccessfulStatusCode();
 
-        //GraphTestCase.generateGraph(globalNominalTestSequence);
-
+        // Genera i test di errore utilizzando il fuzzer di errore
         ErrorFuzzer errorFuzzer = new ErrorFuzzer(globalNominalTestSequence);
         errorFuzzer.generateTestSequences(10);
 
+        // Salva i risultati dei test di errore in MongoDB
         restAssuredWriterDb.addErrorMap(errorFuzzer.getErrorMap());
-
         restAssuredWriterDb.writeError();
-
-        restAssuredWriterDb.getErrorMap();
-
         restAssuredWriterDb.write();
 
+        // Chiudi i repository di MongoDB
         reportWriterDb.closeAllRepository();
         restAssuredWriterDb.closeAllRepository();
 
+        // Scrivi il report di copertura su MongoDB
         try {
             CoverageReportWriter coverageReportWriter = new CoverageReportWriter(TestRunner.getInstance().getCoverage());
             coverageReportWriter.write();
@@ -101,14 +89,11 @@ public class NominalAndErrorStrategy extends Strategy {
             coverageReportWriterDb = new CoverageReportWriterDb(TestRunner.getInstance().getCoverage());
             coverageReportWriterDb.writeSingleCoverage();
             coverageReportWriterDb.writeStats();
-
             coverageReportWriterDb.closeAllRepository();
 
         } catch (IOException e) {
             logger.warn("Could not write Coverage report to file.");
             e.printStackTrace();
         }
-
-
     }
 }
